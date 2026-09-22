@@ -38,7 +38,7 @@ export default async function Page() {
 
   try {
     const supabase = await createClient()
-    const [{ data: propertyData }, { data: settingData }] = await Promise.all([
+    const [propertyResult, settingResult] = await Promise.all([
       supabase
         .from('properties')
         .select('id, title, location, price, area, description, status, cover_image')
@@ -46,8 +46,17 @@ export default async function Page() {
       supabase.from('site_settings').select('key, value'),
     ])
 
-    properties = propertyData ?? []
-    for (const setting of settingData ?? []) {
+    if (propertyResult.error) {
+      console.error('[v0] No se pudieron cargar las propiedades desde Supabase:', propertyResult.error.message)
+    } else {
+      properties = propertyResult.data ?? []
+    }
+
+    if (settingResult.error) {
+      console.error('[v0] No se pudo cargar site_settings desde Supabase:', settingResult.error.message)
+    }
+
+    for (const setting of settingResult.data ?? []) {
       const field = settingKeyMap[setting.key]
       if (field && setting.value) settings[field] = setting.value
     }
