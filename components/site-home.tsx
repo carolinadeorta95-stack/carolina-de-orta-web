@@ -4,7 +4,28 @@ import Image from 'next/image'
 import { ArrowDown, ArrowRight, Menu, Play, Plus, X } from 'lucide-react'
 import { useState } from 'react'
 
-const properties = [
+type Property = {
+  id?: string
+  title: string
+  location: string
+  price: string | number
+  area: string | number
+  description?: string | null
+  status?: string | null
+  cover_image?: string | null
+}
+
+type DisplayProperty = {
+  id?: string
+  image: string
+  type: string
+  title: string
+  location: string
+  price: string | number
+  area: string | number
+}
+
+const fallbackProperties: DisplayProperty[] = [
   { image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85', type: 'Casa · Venta', title: 'Casa en Barrio Los Faldeos', location: 'San Martín de los Andes', price: 'USD 420.000', area: '186 m²' },
   { image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=85', type: 'Departamento · Venta', title: 'Refugio contemporáneo', location: 'Centro · San Martín de los Andes', price: 'USD 198.000', area: '72 m²' },
   { image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=85', type: 'Casa · Venta', title: 'Patio de luz', location: 'Lago Lolog', price: 'USD 560.000', area: '224 m²' },
@@ -15,8 +36,22 @@ const journal = [
   { category: 'Análisis', title: 'Patagonia: señales de un mercado que cambia', date: '28.05.24', image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1000&q=85' },
 ]
 
-export function SiteHome() {
+export function SiteHome({ properties }: { properties: Property[] }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const displayProperties: DisplayProperty[] = properties.length > 0
+    ? properties.map((property, index) => {
+        const fallback = fallbackProperties[index % fallbackProperties.length]
+        return {
+          id: property.id,
+          image: property.cover_image || fallback.image,
+          type: property.status || fallback.type,
+          title: property.title,
+          location: property.location,
+          price: property.price,
+          area: property.area,
+        }
+      })
+    : fallbackProperties
   return (
     <main className="site-shell">
       <header className="site-header">
@@ -36,7 +71,7 @@ export function SiteHome() {
 
       <section id="intro" className="intro-section section-pad"><div className="section-kicker">01 / UNA MIRADA PROPIA</div><div className="intro-grid"><h2>Patagonia, <em>con criterio.</em></h2><div><p className="lead">Soy Carolina de Orta, Licenciada en Economía y Martillera Pública. Acompaño decisiones inmobiliarias con análisis, conocimiento del territorio y una perspectiva de largo plazo.</p><a href="#sobre-mí" className="text-link">Conocer más sobre mí <ArrowRight size={16} /></a></div></div></section>
 
-      <section id="propiedades" className="properties-section section-pad gray-section"><div className="section-heading"><div><div className="section-kicker">02 / PROPIEDADES</div><h2>Espacios para<br /><em>habitar.</em></h2></div><a className="text-link" href="#contacto">Ver todas <ArrowRight size={16} /></a></div><div className="property-grid">{properties.map((property, index) => <article className={index === 0 ? 'property-card featured' : 'property-card'} key={property.title}><div className="property-image"><Image src={property.image} alt={property.title} fill sizes="(max-width: 700px) 100vw, 33vw" /><span className="image-number">0{index + 1}</span></div><div className="property-meta"><p className="eyebrow">{property.type}</p><h3>{property.title}</h3><p>{property.location}</p><div className="property-bottom"><span>{property.price}</span><span>{property.area}</span></div></div></article>)}</div></section>
+      <section id="propiedades" className="properties-section section-pad gray-section"><div className="section-heading"><div><div className="section-kicker">02 / PROPIEDADES</div><h2>Espacios para<br /><em>habitar.</em></h2></div><a className="text-link" href="#contacto">Ver todas <ArrowRight size={16} /></a></div><div className="property-grid">{displayProperties.map((property, index) => { const price = typeof property.price === 'number' ? `USD ${property.price.toLocaleString('es-AR')}` : property.price; const area = typeof property.area === 'number' ? `${property.area} m²` : property.area; return <article className={index === 0 ? 'property-card featured' : 'property-card'} key={property.id || property.title}><div className="property-image"><Image src={property.image} alt={property.title} fill sizes="(max-width: 700px) 100vw, 33vw" /><span className="image-number">0{index + 1}</span></div><div className="property-meta"><p className="eyebrow">{property.type}</p><h3>{property.title}</h3><p>{property.location}</p><div className="property-bottom"><span>{price}</span><span>{area}</span></div></div></article> })}</div></section>
 
       <section id="proyectos" className="projects-section section-pad"><div className="projects-copy"><div className="section-kicker light">03 / PROYECTOS</div><h2>Ideas que<br /><em>toman forma.</em></h2><p>Desarrollos seleccionados y oportunidades para invertir en un territorio con identidad, crecimiento y horizonte.</p><a className="text-link light-link" href="#contacto">Conocer proyectos <ArrowRight size={16} /></a></div><div className="project-visual"><Image src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85" alt="Arquitectura contemporánea integrada al paisaje" fill sizes="(max-width: 800px) 100vw, 50vw" /><div className="project-tag">01 <span>·</span> DESARROLLO</div></div></section>
 
