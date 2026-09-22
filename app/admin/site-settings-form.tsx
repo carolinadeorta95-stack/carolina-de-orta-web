@@ -1,6 +1,7 @@
 'use client'
 
 import { ChangeEvent, FormEvent, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 type SiteSettings = {
   brandName: string
@@ -22,8 +23,8 @@ const initialSettings: SiteSettings = {
   accentColor: '#f5f5f3',
 }
 
-export default function SiteSettingsForm() {
-  const [settings, setSettings] = useState(initialSettings)
+export default function SiteSettingsForm({ initialValues }: { initialValues?: Partial<SiteSettings> }) {
+  const [settings, setSettings] = useState({ ...initialSettings, ...initialValues })
   const [message, setMessage] = useState('')
 
   function update(field: keyof SiteSettings, value: string) {
@@ -37,9 +38,36 @@ export default function SiteSettingsForm() {
     setMessage(`Logo seleccionado: ${file.name}. La carga a Storage quedará disponible al conectar la configuración de Storage.`)
   }
 
-  function save(event: FormEvent<HTMLFormElement>) {
+  async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setMessage('Configuración preparada. Para persistirla y cargar imágenes, falta conectar la tabla site_settings y Supabase Storage.')
+    setMessage('Guardando configuración...')
+
+    const supabase = createClient()
+    const entries = Object.entries(settings) as [keyof SiteSettings, string][]
+
+    for (const [key, value] of entries) {
+      const { data: existing, error: lookupError } = await supabase
+        .from('site_settings')
+        .select('id')
+        .eq('key', key)
+        .maybeSingle()
+
+      if (lookupError) {
+        setMessage('No se pudo guardar la configuración. Revisá la conexión e intentá nuevamente.')
+        return
+      }
+
+      const result = existing
+        ? await supabase.from('site_settings').update({ value }).eq('id', existing.id)
+        : await supabase.from('site_settings').insert({ id: crypto.randomUUID(), key, value })
+
+      if (result.error) {
+        setMessage('No se pudo guardar la configuración. Revisá la conexión e intentá nuevamente.')
+        return
+      }
+    }
+
+    setMessage('Configuración guardada correctamente.')
   }
 
   return (
