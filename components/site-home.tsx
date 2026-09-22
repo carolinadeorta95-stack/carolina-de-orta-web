@@ -25,16 +25,6 @@ type DisplayProperty = {
   area: string | number
 }
 
-type SiteSettings = {
-  brandName?: string
-  logoUrl?: string
-  heroImageUrl?: string
-  heroTitle?: string
-  heroDescription?: string
-  primaryColor?: string
-  accentColor?: string
-}
-
 const fallbackProperties: DisplayProperty[] = [
   { image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85', type: 'Casa · Venta', title: 'Casa en Barrio Los Faldeos', location: 'San Martín de los Andes', price: 'USD 420.000', area: '186 m²' },
   { image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=85', type: 'Departamento · Venta', title: 'Refugio contemporáneo', location: 'Centro · San Martín de los Andes', price: 'USD 198.000', area: '72 m²' },
@@ -46,12 +36,8 @@ const journal = [
   { category: 'Análisis', title: 'Patagonia: señales de un mercado que cambia', date: '28.05.24', image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1000&q=85' },
 ]
 
-export function SiteHome({ properties, settings }: { properties: Property[]; settings?: SiteSettings }) {
+export function SiteHome({ properties }: { properties: Property[] }) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const brandName = settings?.brandName || 'Carolina de Orta'
-  const heroImage = settings?.heroImageUrl || 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2200&q=90'
-  const heroTitle = settings?.heroTitle || 'Donde el territorio se vuelve decisión.'
-  const heroDescription = settings?.heroDescription || 'Una mirada profesional sobre propiedades, proyectos e inversiones en Patagonia Argentina.'
   const displayProperties: DisplayProperty[] = properties.length > 0
     ? properties.map((property, index) => {
         const fallback = fallbackProperties[index % fallbackProperties.length]
@@ -69,7 +55,7 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
   return (
     <main className="site-shell">
       <header className="site-header">
-        <a className="brand" href="#inicio" aria-label={`${brandName}, inicio`}>{settings?.logoUrl ? <Image src={settings.logoUrl} alt={brandName} width={150} height={52} className="brand-logo" /> : <><span>{brandName.split(' ')[0]}</span><span>{brandName.split(' ').slice(1).join(' ') || brandName}</span></>}</a>
+        <a className="brand" href="#inicio" aria-label="Carolina de Orta, inicio"><span>CAROLINA</span><span>DE ORTA</span></a>
         <nav className={menuOpen ? 'main-nav is-open' : 'main-nav'} aria-label="Navegación principal">
           {['Propiedades', 'Proyectos', 'Actualidad', 'Sobre mí', 'Contacto'].map((item) => <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`} onClick={() => setMenuOpen(false)}>{item}</a>)}
         </nav>
@@ -77,9 +63,9 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
       </header>
 
       <section id="inicio" className="hero-section">
-        <div className="hero-image"><Image src={heroImage} alt="Paisaje patagónico de montaña y lago" fill priority sizes="100vw" /></div>
+        <div className="hero-image"><Image src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2200&q=90" alt="Paisaje patagónico de montaña y lago" fill priority sizes="100vw" /></div>
         <div className="hero-overlay" />
-        <div className="hero-copy"><p className="eyebrow light">REAL ESTATE · ECONOMÍA · PATAGONIA</p><h1>{heroTitle}</h1><p className="hero-description">{heroDescription}</p><a className="text-link light-link" href="#propiedades">Explorar propiedades <ArrowRight size={16} /></a></div>
+        <div className="hero-copy"><p className="eyebrow light">REAL ESTATE · ECONOMÍA · PATAGONIA</p><h1>Donde el territorio<br /><em>se vuelve decisión.</em></h1><p className="hero-description">Una mirada profesional sobre propiedades, proyectos e inversiones en Patagonia Argentina.</p><a className="text-link light-link" href="#propiedades">Explorar propiedades <ArrowRight size={16} /></a></div>
         <div className="hero-index">01 <span>/</span> 05</div><a href="#intro" className="scroll-cue" aria-label="Continuar"><ArrowDown size={17} /></a>
       </section>
 
