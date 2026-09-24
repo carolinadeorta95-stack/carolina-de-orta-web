@@ -50,19 +50,25 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
     setMessage('')
   }
 
-  async function uploadImage(file: File, prefix: string) {
-    const supabase = createClient()
-    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  async function uploadImage(file: File, prefix: 'logo' | 'hero') {
+    if (!(file instanceof Blob) || !file.name) {
+      throw new Error('El archivo seleccionado no es un File/Blob válido.')
+    }
+
+    const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
     const path = `${prefix}/${crypto.randomUUID()}.${extension}`
+    const supabase = createClient()
     const { data, error } = await supabase.storage.from('site-assets').upload(path, file, {
-      upsert: false,
+      cacheControl: '3600',
       contentType: file.type || 'application/octet-stream',
+      upsert: false,
     })
 
     if (error) throw error
     if (!data?.path) throw new Error('Supabase Storage no devolvió el path del archivo subido.')
 
     const { data: publicUrl } = supabase.storage.from('site-assets').getPublicUrl(data.path)
+    if (!publicUrl?.publicUrl) throw new Error('Supabase Storage no devolvió una URL pública.')
     return publicUrl.publicUrl
   }
 
@@ -97,7 +103,7 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
         error: storageError.error ?? '',
       }
       console.error('Storage upload error:', error)
-      setMessage(`Error Storage: ${errorDetails.message} | name: ${errorDetails.name || 'n/a'} | status: ${errorDetails.status || 'n/a'} | statusCode: ${errorDetails.statusCode || 'n/a'}`)
+      setMessage(`Error Storage: ${errorDetails.message} | name: ${errorDetails.name || 'n/a'} | status: ${errorDetails.status || 'n/a'} | statusCode: ${errorDetails.statusCode || 'n/a'} | error: ${String(errorDetails.error || 'n/a')}`)
       return
     }
 
