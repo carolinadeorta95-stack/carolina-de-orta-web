@@ -75,8 +75,22 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
         settings.heroImageUrl = heroImageUrl
       }
     } catch (error) {
-      console.error('[v0] Error uploading site image:', error)
-      setMessage('No se pudo subir la imagen. Revisá el bucket público site-assets e intentá nuevamente.')
+      const storageError = error as {
+        message?: string
+        name?: string
+        status?: number | string
+        statusCode?: number | string
+        error?: unknown
+      }
+      const errorDetails = {
+        message: storageError.message ?? String(error),
+        name: storageError.name ?? '',
+        status: storageError.status ?? '',
+        statusCode: storageError.statusCode ?? '',
+        error: storageError.error ?? '',
+      }
+      console.error('[v0] Error uploading site image:', errorDetails, error)
+      setMessage(`Error Storage: ${JSON.stringify(errorDetails)}`)
       return
     }
 
