@@ -66,9 +66,11 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
 
     if (error) throw error
     if (!data?.path) throw new Error('Supabase Storage no devolvió el path del archivo subido.')
+    console.log('Uploaded path:', data.path)
 
     const { data: publicUrl } = supabase.storage.from('Media').getPublicUrl(data.path)
     if (!publicUrl?.publicUrl) throw new Error('Supabase Storage no devolvió una URL pública.')
+    console.log('Generated public URL:', publicUrl.publicUrl)
     return publicUrl.publicUrl
   }
 
@@ -111,6 +113,7 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
     const entries = Object.entries(settings) as [keyof SiteSettings, string][]
 
     for (const [key, value] of entries) {
+      console.log('Saving site_settings value:', { key, value })
       const { data: existing, error: lookupError } = await supabase
         .from('site_settings')
         .select('id')
@@ -118,7 +121,8 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
         .maybeSingle()
 
       if (lookupError) {
-        setMessage('No se pudo guardar la configuración. Revisá la conexión e intentá nuevamente.')
+        console.error('site_settings lookup error:', lookupError)
+        setMessage(`Error site_settings: ${lookupError.message}`)
         return
       }
 
@@ -127,12 +131,27 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
         : await supabase.from('site_settings').insert({ id: crypto.randomUUID(), key, value })
 
       if (result.error) {
-        setMessage('No se pudo guardar la configuración. Revisá la conexión e intentá nuevamente.')
+        console.error('site_settings save error:', result.error)
+        setMessage(`Error site_settings: ${result.error.message}`)
         return
       }
+
+      const { data: saved, error: verifyError } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', key)
+        .maybeSingle()
+      if (verifyError) {
+        console.error('site_settings verify error:', verifyError)
+        setMessage(`Error verificando site_settings: ${verifyError.message}`)
+        return
+      }
+      console.log('Saved site_settings value:', { key, value: saved?.value })
     }
 
-    setMessage('Configuración guardada correctamente.')
+    setLogoFile(null)
+    setHeroFile(null)
+    setMessage('Configuración guardada correctamente. Recargá el Preview para ver los cambios.')
   }
 
   return (
