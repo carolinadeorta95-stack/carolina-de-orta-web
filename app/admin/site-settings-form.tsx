@@ -58,7 +58,7 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
     const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
     const path = `${prefix}/${crypto.randomUUID()}.${extension}`
     const supabase = createClient()
-    const { data, error } = await supabase.storage.from('site-assets').upload(path, file, {
+    const { data, error } = await supabase.storage.from('Media').upload(path, file, {
       cacheControl: '3600',
       contentType: file.type || 'application/octet-stream',
       upsert: false,
@@ -67,7 +67,7 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
     if (error) throw error
     if (!data?.path) throw new Error('Supabase Storage no devolvió el path del archivo subido.')
 
-    const { data: publicUrl } = supabase.storage.from('site-assets').getPublicUrl(data.path)
+    const { data: publicUrl } = supabase.storage.from('Media').getPublicUrl(data.path)
     if (!publicUrl?.publicUrl) throw new Error('Supabase Storage no devolvió una URL pública.')
     return publicUrl.publicUrl
   }
