@@ -25,6 +25,10 @@ const initialSettings: SiteSettings = {
 
 export default function SiteSettingsForm({ initialValues }: { initialValues?: Partial<SiteSettings> }) {
   const [settings, setSettings] = useState({ ...initialSettings, ...initialValues })
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [heroFile, setHeroFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState(initialValues?.logoUrl || '')
+  const [heroPreview, setHeroPreview] = useState(initialValues?.heroImageUrl || initialSettings.heroImageUrl)
   const [message, setMessage] = useState('')
 
   function update(field: keyof SiteSettings, value: string) {
@@ -32,15 +36,49 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
     setMessage('')
   }
 
-  function handleFile(event: ChangeEvent<HTMLInputElement>) {
+  function selectImage(field: 'logo' | 'hero', event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
-    setMessage(`Logo seleccionado: ${file.name}. La carga a Storage quedará disponible al conectar la configuración de Storage.`)
+    const preview = URL.createObjectURL(file)
+    if (field === 'logo') {
+      setLogoFile(file)
+      setLogoPreview(preview)
+    } else {
+      setHeroFile(file)
+      setHeroPreview(preview)
+    }
+    setMessage('')
+  }
+
+  async function uploadImage(file: File, prefix: string) {
+    const supabase = createClient()
+    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const path = `${prefix}/${crypto.randomUUID()}.${extension}`
+    const upload = await supabase.storage.from('site-assets').upload(path, file, { upsert: false, contentType: file.type })
+    if (upload.error) throw upload.error
+    return supabase.storage.from('site-assets').getPublicUrl(path).data.publicUrl
   }
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setMessage('Guardando configuración...')
+
+    try {
+      if (logoFile) {
+        const logoUrl = await uploadImage(logoFile, 'logo')
+        setSettings((current) => ({ ...current, logoUrl }))
+        settings.logoUrl = logoUrl
+      }
+      if (heroFile) {
+        const heroImageUrl = await uploadImage(heroFile, 'hero')
+        setSettings((current) => ({ ...current, heroImageUrl }))
+        settings.heroImageUrl = heroImageUrl
+      }
+    } catch (error) {
+      console.error('[v0] Error uploading site image:', error)
+      setMessage('No se pudo subir la imagen. Revisá el bucket público site-assets e intentá nuevamente.')
+      return
+    }
 
     const supabase = createClient()
     const entries = Object.entries(settings) as [keyof SiteSettings, string][]
@@ -81,9 +119,8 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
       </div>
       <form className="property-form" onSubmit={save}>
         <label>Nombre de la marca<input value={settings.brandName} onChange={(event) => update('brandName', event.target.value)} /></label>
-        <label>Logo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={handleFile} /><small className="admin-help">Si no hay logo, el sitio conserva el fallback de texto.</small></label>
-        <label>URL del logo<input type="url" value={settings.logoUrl} onChange={(event) => update('logoUrl', event.target.value)} placeholder="https://..." /></label>
-        <label>Imagen principal / hero<input type="url" value={settings.heroImageUrl} onChange={(event) => update('heroImageUrl', event.target.value)} /></label>
+        <label>Logo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => selectImage('logo', event)} /><small className="admin-help">Si no seleccionás un archivo, se conserva el logo actual.</small>{logoPreview && <img className="admin-image-preview admin-logo-preview" src={logoPreview} alt="Vista previa del logo" />}</label>
+        <label>Imagen principal / hero<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectImage('hero', event)} /><small className="admin-help">Si no seleccionás un archivo, se conserva la imagen actual.</small>{heroPreview && <img className="admin-image-preview" src={heroPreview} alt="Vista previa de la imagen principal" />}</label>
         <label className="full-field">Título principal<input value={settings.heroTitle} onChange={(event) => update('heroTitle', event.target.value)} /></label>
         <label className="full-field">Frase principal<textarea rows={3} value={settings.heroDescription} onChange={(event) => update('heroDescription', event.target.value)} /></label>
         <label>Color principal<input type="text" value={settings.primaryColor} onChange={(event) => update('primaryColor', event.target.value)} /></label>
