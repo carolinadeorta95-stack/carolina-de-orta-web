@@ -48,7 +48,7 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
   const [menuOpen, setMenuOpen] = useState(false)
   const brandName = settings?.brandName || 'Carolina de Orta'
   const heroImage = settings?.heroImageUrl || 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2200&q=90'
-  const heroTitle = settings?.heroTitle || 'Donde el territorio'
+  const heroTitle = settings?.heroTitle || 'Donde el territorio se vuelve decisión.'
   const heroDescription = settings?.heroDescription || 'Una mirada profesional sobre propiedades, proyectos e inversiones en Patagonia Argentina.'
   const displayProperties: DisplayProperty[] = properties.length > 0
     ? properties.map((property, index) => {
@@ -77,7 +77,7 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
       <section id="inicio" className="hero-section">
         <div className="hero-image"><Image src={heroImage} alt="Paisaje patagónico de montaña y lago" fill priority sizes="100vw" /></div>
         <div className="hero-overlay" />
-        <div className="hero-copy"><p className="eyebrow light">REAL ESTATE · ECONOMÍA · PATAGONIA</p><h1>{heroTitle}<br /><em>se vuelve decisión.</em></h1><p className="hero-description">{heroDescription}</p><a className="text-link light-link" href="#propiedades">Explorar propiedades <ArrowRight size={16} /></a></div>
+        <div className="hero-copy"><p className="eyebrow light">REAL ESTATE · ECONOMÍA · PATAGONIA</p><h1>Donde el territorio<br /><em>se vuelve decisión.</em></h1><p className="hero-description">{heroDescription}</p><a className="text-link light-link" href="#propiedades">Explorar propiedades <ArrowRight size={16} /></a></div>
         <div className="hero-index">01 <span>/</span> 05</div><a href="#intro" className="scroll-cue" aria-label="Continuar"><ArrowDown size={17} /></a>
       </section>
 
