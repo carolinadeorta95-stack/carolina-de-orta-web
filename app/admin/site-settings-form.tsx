@@ -54,9 +54,16 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
     const supabase = createClient()
     const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const path = `${prefix}/${crypto.randomUUID()}.${extension}`
-    const upload = await supabase.storage.from('site-assets').upload(path, file, { upsert: false, contentType: file.type })
-    if (upload.error) throw upload.error
-    return supabase.storage.from('site-assets').getPublicUrl(path).data.publicUrl
+    const { data, error } = await supabase.storage.from('site-assets').upload(path, file, {
+      upsert: false,
+      contentType: file.type || 'application/octet-stream',
+    })
+
+    if (error) throw error
+    if (!data?.path) throw new Error('Supabase Storage no devolvió el path del archivo subido.')
+
+    const { data: publicUrl } = supabase.storage.from('site-assets').getPublicUrl(data.path)
+    return publicUrl.publicUrl
   }
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -89,8 +96,8 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
         statusCode: storageError.statusCode ?? '',
         error: storageError.error ?? '',
       }
-      console.error('[v0] Error uploading site image:', errorDetails, error)
-      setMessage(`Error Storage: ${JSON.stringify(errorDetails)}`)
+      console.error('Storage upload error:', error)
+      setMessage(`Error Storage: ${errorDetails.message} | name: ${errorDetails.name || 'n/a'} | status: ${errorDetails.status || 'n/a'} | statusCode: ${errorDetails.statusCode || 'n/a'}`)
       return
     }
 
