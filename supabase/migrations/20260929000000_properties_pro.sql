@@ -62,4 +62,38 @@ create table if not exists public.property_images (
 create index if not exists property_images_property_order_idx on public.property_images (property_id, sort_order, created_at);
 create unique index if not exists property_images_one_cover_uidx on public.property_images (property_id) where is_cover;
 
+alter table public.property_images enable row level security;
+
+grant select on table public.property_images to anon;
+grant select, insert, update, delete on table public.property_images to authenticated;
+
+drop policy if exists "property_images_public_read" on public.property_images;
+create policy "property_images_public_read"
+  on public.property_images
+  for select
+  to anon, authenticated
+  using (true);
+
+drop policy if exists "property_images_authenticated_insert" on public.property_images;
+create policy "property_images_authenticated_insert"
+  on public.property_images
+  for insert
+  to authenticated
+  with check (true);
+
+drop policy if exists "property_images_authenticated_update" on public.property_images;
+create policy "property_images_authenticated_update"
+  on public.property_images
+  for update
+  to authenticated
+  using (true)
+  with check (true);
+
+drop policy if exists "property_images_authenticated_delete" on public.property_images;
+create policy "property_images_authenticated_delete"
+  on public.property_images
+  for delete
+  to authenticated
+  using (true);
+
 commit;
