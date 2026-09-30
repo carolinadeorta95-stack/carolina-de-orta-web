@@ -40,9 +40,9 @@ type SiteSettings = { brandName: string; logoUrl: string; heroImageUrl: string; 
 const empty: FormState = { property_code: '', title: '', location: '', address: '', neighborhood: '', city: '', province: '', price: '', area: '', description: '', status: 'Disponible', cover_image: '', operation_type: 'Venta', property_type: 'Casa', featured: false, published: true, bedrooms: null, bathrooms: null, garages: null, covered_area_m2: null, land_area_m2: null, latitude: null, longitude: null, location_precision: 'approximate' }
 
 function displayPrice(value: string | number | null | undefined) {
-  if (value === null || value === undefined || String(value).trim() === '') return '—'
+  if (value === null || value === undefined) return '—'
   const text = String(value).trim()
-  return /^\s*(USD|ARS|EUR)\b/i.test(text) ? text : text
+  return text || '—'
 }
 
 const fields = [
@@ -98,8 +98,7 @@ export default function AdminDashboard({ email, initialProperties, initialImages
     event.preventDefault(); setSaving(true); setMessage('Guardando propiedad…')
     const supabase = createClient()
     const rawPrice = String(form.price ?? '').trim()
-    const numericPrice = rawPrice.replace(/[^0-9.,-]/g, '').replace(/\.(?=.*\.)/g, '').replace(',', '.')
-    const payload = { ...form, price: rawPrice === '' ? null : (Number.isFinite(Number(numericPrice)) ? rawPrice : rawPrice), area: String(form.area) === '' ? null : Number(form.area), bedrooms: String(form.bedrooms) === '' ? null : form.bedrooms, bathrooms: String(form.bathrooms) === '' ? null : form.bathrooms, garages: String(form.garages) === '' ? null : form.garages, covered_area_m2: String(form.covered_area_m2) === '' ? null : form.covered_area_m2, land_area_m2: String(form.land_area_m2) === '' ? null : form.land_area_m2 }
+    const payload = { ...form, price: rawPrice === '' ? null : rawPrice, area: String(form.area) === '' ? null : Number(form.area), bedrooms: String(form.bedrooms) === '' ? null : form.bedrooms, bathrooms: String(form.bathrooms) === '' ? null : form.bathrooms, garages: String(form.garages) === '' ? null : form.garages, covered_area_m2: String(form.covered_area_m2) === '' ? null : form.covered_area_m2, land_area_m2: String(form.land_area_m2) === '' ? null : form.land_area_m2 }
     const result = editing ? await supabase.from('properties').update(payload).eq('id', editing).select().single() : await supabase.from('properties').insert(payload).select().single()
     if (result.error) { setSaving(false); setMessage(`No se pudo guardar: ${result.error.message}`); return }
     try { if (pendingFiles.length) await uploadFiles(result.data.id, pendingFiles) } catch (error) { setSaving(false); setMessage(`Propiedad guardada, pero falló la galería: ${error instanceof Error ? error.message : 'error de Storage'}`); return }
