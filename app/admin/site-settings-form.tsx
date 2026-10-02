@@ -90,10 +90,40 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
   function removeImage(key: 'heroImagesJson' | 'projectImagesJson', index: number) { const next = imageList(key); next.splice(index, 1); updateImageList(key, next) }
   function moveImage(key: 'heroImagesJson' | 'projectImagesJson', index: number, direction: -1 | 1) { const next = imageList(key); const target = index + direction; if (target < 0 || target >= next.length) return; [next[index], next[target]] = [next[target], next[index]]; updateImageList(key, next) }
 
+  async function persistSetting(key: keyof SiteSettings, value: string) {
+    const supabase = createClient()
+    const { data: existing, error: lookupError } = await supabase.from('site_settings').select('id').eq('key', key).maybeSingle()
+    if (lookupError) throw lookupError
+    const result = existing
+      ? await supabase.from('site_settings').update({ value }).eq('id', existing.id)
+      : await supabase.from('site_settings').insert({ id: crypto.randomUUID(), key, value })
+    if (result.error) throw result.error
+  }
+
+  async function selectHeroRotationFiles(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? [])
+    if (!files.length) return
+    setMessage('Subiendo imágenes de portada...')
+    try {
+      const existing = imageList('heroImagesJson')
+      const uploaded = await Promise.all(files.map((file) => uploadContentFile(file, 'hero-rotation')))
+      const next = [...existing, ...uploaded]
+      const value = JSON.stringify(next)
+      setSettings((current) => ({ ...current, heroImagesJson: value }))
+      await persistSetting('heroImagesJson', value)
+      setMessage(`${uploaded.length} imagen${uploaded.length === 1 ? '' : 'es'} agregada${uploaded.length === 1 ? '' : 's'} a la rotación.`)
+    } catch (error) {
+      setMessage(`Error subiendo imágenes: ${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+      event.target.value = ''
+    }
+  }
+
   function selectContentFile(kind: NonNullable<typeof contentFileKind>, event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
     if (!files.length) return
-    if (kind === 'heroImagesJson' || kind === 'projectImagesJson') { setContentFiles(files); setContentFileKind(kind) }
+    if (kind === 'heroImagesJson') { void selectHeroRotationFiles(event); return }
+    if (kind === 'projectImagesJson') { setContentFiles(files); setContentFileKind(kind) }
     else { setContentFile(files[0]); setContentFileKind(kind) }
   }
 
@@ -256,8 +286,8 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
         {section === 'portada' && <>
           <label>Nombre de la marca<input value={settings.brandName} onChange={(event) => update('brandName', event.target.value)} /></label>
           <label>Logo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => selectImage('logo', event)} /><small className="admin-help">Subir imagen a Media.</small>{logoPreview && <img className="admin-image-preview admin-logo-preview" src={logoPreview} alt="Vista previa del logo" />}</label>
-          <label>Imagen principal / hero<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectImage('hero', event)} /><small className="admin-help">Subir imagen a Media.</small>{heroPreview && <img className="admin-image-preview" src={heroPreview} alt="Vista previa hero" />}</label>
-          <label className="dropzone">Agregar imágenes a la rotación<input type="file" accept="image/*" multiple onChange={(event) => selectContentFile('heroImagesJson', event)} /></label>
+          <label className="hero-media-slot">Imagen principal / hero<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectImage('hero', event)} /><small className="admin-help">Subir imagen a Media.</small>{heroPreview && <img className="admin-image-preview" src={heroPreview} alt="Vista previa hero" />}</label>
+          <label className="dropzone hero-media-slot">Agregar imágenes a la rotación<input type="file" accept="image/*" multiple onChange={selectHeroRotationFiles} /><small className="admin-help">Se suben automáticamente a Media al seleccionarlas.</small></label>
           <small className="admin-help">Las imágenes se guardan en Media y se muestran en rotación automática.</small><div className="gallery-grid">{imageList('heroImagesJson').map((url, index) => <div className="gallery-card" key={`${url}-${index}`}><img src={url} alt={`Imagen de portada ${index + 1}`} /><div><button type="button" onClick={() => moveImage('heroImagesJson', index, -1)}>↑</button><button type="button" onClick={() => moveImage('heroImagesJson', index, 1)}>↓</button><button type="button" onClick={() => removeImage('heroImagesJson', index)}>Eliminar</button></div></div>)}</div>
         </>}
         {section === 'sobre-mi' && <label>Fotografía<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectContentFile('aboutImageUrl', event)} /><small className="admin-help">Subir fotografía a Media.</small></label>}
