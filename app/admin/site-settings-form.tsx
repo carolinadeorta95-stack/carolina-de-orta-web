@@ -35,6 +35,22 @@ type SiteSettings = {
   projectImageUrl: string
   journalCoverUrl: string
   journalVideoUrl: string
+  heroImagesJson: string
+  projectImagesJson: string
+  introKicker: string
+  propertiesKicker: string
+  projectsKicker: string
+  journalKicker: string
+  aboutKicker: string
+  contactKicker: string
+  heroCta: string
+  introCta: string
+  propertiesCta: string
+  projectsCta: string
+  journalCta: string
+  aboutCta: string
+  contactCta: string
+  heroKicker: string
 }
 
 const initialSettings: SiteSettings = {
@@ -48,7 +64,7 @@ const initialSettings: SiteSettings = {
   introTitle: 'Patagonia, con criterio.', introLead: 'Soy Carolina de Orta, Licenciada en Economía y Martillera Pública. Acompaño decisiones inmobiliarias con análisis, conocimiento del territorio y una perspectiva de largo plazo.', introLink: 'Conocer más sobre mí',
   propertiesTitle: 'Espacios para habitar.', propertiesLink: 'Ver todas', projectsTitle: 'Ideas que toman forma.', projectsDescription: 'Desarrollos seleccionados y oportunidades para invertir en un territorio con identidad, crecimiento y horizonte.', projectsLink: 'Conocer proyectos',
   journalTitle: 'Notas sobre el territorio.', journalLink: 'Ver actualidad', aboutTitle: 'Una forma de mirar.', aboutLead: 'La economía y el real estate se encuentran en una misma pregunta: ¿qué hace que un lugar tenga valor?', aboutDescription: 'Mi trabajo parte de escuchar, observar y traducir información compleja en decisiones claras. Con San Martín de los Andes y la Patagonia como territorio de estudio y pertenencia.', aboutImageUrl: '',
-  contactTitle: 'Hagamos lugar a una conversación.', contactDescription: 'Si estás pensando en comprar, vender o invertir en Patagonia, escribime.', contactEmail: 'hola@carolinadeorta.com', instagramUrl: '', linkedinUrl: '', whatsappUrl: '', footerRole: 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA', projectImageUrl: '', journalCoverUrl: '', journalVideoUrl: '',
+  contactTitle: 'Hagamos lugar a una conversación.', contactDescription: 'Si estás pensando en comprar, vender o invertir en Patagonia, escribime.', contactEmail: 'hola@carolinadeorta.com', instagramUrl: '', linkedinUrl: '', whatsappUrl: '', footerRole: 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA', projectImageUrl: '', journalCoverUrl: '', journalVideoUrl: '', heroImagesJson: '[]', projectImagesJson: '[]', introKicker: '01 / UNA MIRADA PROPIA', propertiesKicker: '02 / PROPIEDADES', projectsKicker: '03 / PROYECTOS', journalKicker: '04 / ACTUALIDAD', aboutKicker: '05 / SOBRE MÍ', contactKicker: '06 / CONTACTO', heroKicker: 'REAL ESTATE · ECONOMÍA · PATAGONIA', heroCta: 'Explorar propiedades', introCta: 'Conocer más sobre mí', propertiesCta: 'Ver todas', projectsCta: 'Conocer proyectos', journalCta: 'Ver actualidad', aboutCta: 'Hablemos', contactCta: 'Escribime',
 }
 
 export type CmsSection = 'portada' | 'introduccion' | 'proyectos' | 'actualidad' | 'sobre-mi'
@@ -60,7 +76,8 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
   const [logoPreview, setLogoPreview] = useState(initialValues?.logoUrl || '')
   const [heroPreview, setHeroPreview] = useState(initialValues?.heroImageUrl || initialSettings.heroImageUrl)
   const [contentFile, setContentFile] = useState<File | null>(null)
-  const [contentFileKind, setContentFileKind] = useState<'aboutImageUrl' | 'projectImageUrl' | 'journalCoverUrl' | 'journalVideoUrl' | null>(null)
+  const [contentFiles, setContentFiles] = useState<File[]>([])
+  const [contentFileKind, setContentFileKind] = useState<'aboutImageUrl' | 'projectImageUrl' | 'journalCoverUrl' | 'journalVideoUrl' | 'heroImagesJson' | 'projectImagesJson' | null>(null)
   const [message, setMessage] = useState('')
 
   function update(field: keyof SiteSettings, value: string) {
@@ -68,9 +85,16 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
     setMessage('')
   }
 
+  function imageList(key: 'heroImagesJson' | 'projectImagesJson') { try { return JSON.parse(settings[key] || '[]') as string[] } catch { return [] } }
+  function updateImageList(key: 'heroImagesJson' | 'projectImagesJson', next: string[]) { update(key, JSON.stringify(next)) }
+  function removeImage(key: 'heroImagesJson' | 'projectImagesJson', index: number) { const next = imageList(key); next.splice(index, 1); updateImageList(key, next) }
+  function moveImage(key: 'heroImagesJson' | 'projectImagesJson', index: number, direction: -1 | 1) { const next = imageList(key); const target = index + direction; if (target < 0 || target >= next.length) return; [next[index], next[target]] = [next[target], next[index]]; updateImageList(key, next) }
+
   function selectContentFile(kind: NonNullable<typeof contentFileKind>, event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (file) { setContentFile(file); setContentFileKind(kind) }
+    const files = Array.from(event.target.files ?? [])
+    if (!files.length) return
+    if (kind === 'heroImagesJson' || kind === 'projectImagesJson') { setContentFiles(files); setContentFileKind(kind) }
+    else { setContentFile(files[0]); setContentFileKind(kind) }
   }
 
   async function uploadContentFile(file: File, kind: string) {
@@ -125,7 +149,11 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
     setMessage('Guardando configuración...')
 
     try {
-      if (contentFile && contentFileKind) {
+      if (contentFileKind === 'heroImagesJson' || contentFileKind === 'projectImagesJson') {
+        const existing = JSON.parse(settings[contentFileKind] || '[]') as string[]
+        const uploaded = await Promise.all(contentFiles.map((file) => uploadContentFile(file, contentFileKind)))
+        settings[contentFileKind] = JSON.stringify([...existing, ...uploaded])
+      } else if (contentFile && contentFileKind) {
         const uploadedUrl = await uploadContentFile(contentFile, contentFileKind)
         settings[contentFileKind] = uploadedUrl
       }
@@ -206,14 +234,14 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
 
   const sectionLabels = { portada: 'Portada', introduccion: 'Introducción', proyectos: 'Proyectos / oportunidades', actualidad: 'Blog / actualidad', 'sobre-mi': 'Sobre mí' }
   const sectionFields = {
-    portada: ['brandName', 'logoUrl', 'heroImageUrl', 'heroTitle', 'heroDescription', 'primaryColor', 'accentColor'],
-    introduccion: ['introTitle', 'introLead', 'introLink'],
-    proyectos: ['projectsTitle', 'projectsDescription', 'projectsLink'],
-    actualidad: ['journalTitle', 'journalLink'],
-    'sobre-mi': ['aboutTitle', 'aboutLead', 'aboutDescription', 'aboutImageUrl', 'footerRole'],
+    portada: ['brandName', 'heroTitle', 'heroDescription', 'heroCta', 'heroKicker'],
+    introduccion: ['introKicker', 'introTitle', 'introLead', 'introCta'],
+    proyectos: ['projectsKicker', 'projectsTitle', 'projectsDescription', 'projectsCta'],
+    actualidad: ['journalKicker', 'journalTitle', 'journalCta'],
+    'sobre-mi': ['aboutKicker', 'aboutTitle', 'aboutLead', 'aboutDescription', 'aboutCta', 'footerRole'],
   } as const
   const activeFields = sectionFields[section]
-  const textFields = ([['introTitle', 'Título'], ['introLead', 'Presentación'], ['introLink', 'Botón'], ['propertiesTitle', 'Título propiedades'], ['propertiesLink', 'Botón propiedades'], ['projectsTitle', 'Título'], ['projectsDescription', 'Descripción'], ['projectsLink', 'Botón'], ['journalTitle', 'Título'], ['journalLink', 'Botón'], ['aboutTitle', 'Título'], ['aboutLead', 'Bajada'], ['aboutDescription', 'Descripción'], ['footerRole', 'Texto del pie']] as const).filter(([field]) => activeFields.includes(field as never))
+  const textFields = ([['heroKicker', 'Bajada hero'], ['heroTitle', 'Título hero'], ['heroDescription', 'Descripción hero'], ['heroCta', 'CTA hero'], ['introKicker', 'Kicker introducción'], ['introTitle', 'Título'], ['introLead', 'Presentación'], ['introCta', 'CTA'], ['projectsKicker', 'Kicker proyectos'], ['projectsTitle', 'Título'], ['projectsDescription', 'Descripción'], ['projectsCta', 'CTA'], ['journalKicker', 'Kicker actualidad'], ['journalTitle', 'Título'], ['journalCta', 'CTA'], ['aboutKicker', 'Kicker sobre mí'], ['aboutTitle', 'Título'], ['aboutLead', 'Bajada'], ['aboutDescription', 'Descripción'], ['aboutCta', 'CTA'], ['footerRole', 'Texto del pie']] as const).filter(([field]) => activeFields.includes(field as never))
 
   return (
     <section className="admin-panel">
@@ -229,12 +257,12 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
           <label>Nombre de la marca<input value={settings.brandName} onChange={(event) => update('brandName', event.target.value)} /></label>
           <label>Logo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => selectImage('logo', event)} /><small className="admin-help">Subir imagen a Media.</small>{logoPreview && <img className="admin-image-preview admin-logo-preview" src={logoPreview} alt="Vista previa del logo" />}</label>
           <label>Imagen principal / hero<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectImage('hero', event)} /><small className="admin-help">Subir imagen a Media.</small>{heroPreview && <img className="admin-image-preview" src={heroPreview} alt="Vista previa hero" />}</label>
-          <label className="full-field">Título principal<input value={settings.heroTitle} onChange={(event) => update('heroTitle', event.target.value)} /></label>
-          <label className="full-field">Frase principal<textarea rows={3} value={settings.heroDescription} onChange={(event) => update('heroDescription', event.target.value)} /></label>
+          <label className="dropzone">Agregar imágenes a la rotación<input type="file" accept="image/*" multiple onChange={(event) => selectContentFile('heroImagesJson', event)} /></label>
+          <small className="admin-help">Las imágenes se guardan en Media y se muestran en rotación automática.</small><div className="gallery-grid">{imageList('heroImagesJson').map((url, index) => <div className="gallery-card" key={`${url}-${index}`}><img src={url} alt={`Imagen de portada ${index + 1}`} /><div><button type="button" onClick={() => moveImage('heroImagesJson', index, -1)}>↑</button><button type="button" onClick={() => moveImage('heroImagesJson', index, 1)}>↓</button><button type="button" onClick={() => removeImage('heroImagesJson', index)}>Eliminar</button></div></div>)}</div>
         </>}
         {section === 'sobre-mi' && <label>Fotografía<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectContentFile('aboutImageUrl', event)} /><small className="admin-help">Subir fotografía a Media.</small></label>}
         {textFields.map(([field, label]) => <label key={field} className={field.endsWith('Description') || field.endsWith('Lead') || field.endsWith('Title') ? 'full-field' : ''}>{label}{field.endsWith('Description') || field.endsWith('Lead') ? <textarea rows={4} value={settings[field]} onChange={(event) => update(field, event.target.value)} /> : <input value={settings[field]} onChange={(event) => update(field, event.target.value)} />}</label>)}
-        {section === 'proyectos' && <><div className="admin-subsection"><h3>Imágenes de proyectos</h3></div><label className="dropzone">Subir imágenes a Media<input type="file" accept="image/*" onChange={(event) => selectContentFile('projectImageUrl', event)} /></label></>}
+        {section === 'proyectos' && <><div className="admin-subsection"><h3>Imágenes de proyectos</h3></div><label className="dropzone">Subir imágenes a Media<input type="file" accept="image/*" multiple onChange={(event) => selectContentFile('projectImagesJson', event)} /></label><div className="gallery-grid">{imageList('projectImagesJson').map((url, index) => <div className="gallery-card" key={`${url}-${index}`}><img src={url} alt={`Imagen de proyecto ${index + 1}`} /><div><button type="button" onClick={() => moveImage('projectImagesJson', index, -1)}>↑</button><button type="button" onClick={() => moveImage('projectImagesJson', index, 1)}>↓</button><button type="button" onClick={() => removeImage('projectImagesJson', index)}>Eliminar</button></div></div>)}</div></>}
         {section === 'actualidad' && <><div className="admin-subsection"><h3>Publicaciones</h3><p className="admin-help">Arquitectura preparada para títulos, bajadas, contenido, fecha, categoría, estado, imagen y video.</p></div><label>Imagen de portada<input type="file" accept="image/*" onChange={(event) => selectContentFile('journalCoverUrl', event)} /></label><label>Video<input type="file" accept="video/*" onChange={(event) => selectContentFile('journalVideoUrl', event)} /></label><label>Título<input value={settings.journalTitle} onChange={(event) => update('journalTitle', event.target.value)} /></label></>}
         <div className="form-actions"><button className="admin-button" type="submit">Guardar {sectionLabels[section]}</button>{message && <span className="admin-success">{message}</span>}</div>
       </form>
