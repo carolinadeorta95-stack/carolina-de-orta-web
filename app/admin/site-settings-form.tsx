@@ -72,9 +72,7 @@ export type CmsSection = 'portada' | 'introduccion' | 'proyectos' | 'actualidad'
 export default function SiteSettingsForm({ initialValues, section }: { initialValues?: Partial<SiteSettings>; section: CmsSection }) {
   const [settings, setSettings] = useState({ ...initialSettings, ...initialValues })
   const [logoFile, setLogoFile] = useState<File | null>(null)
-  const [heroFile, setHeroFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState(initialValues?.logoUrl || '')
-  const [heroPreview, setHeroPreview] = useState(initialValues?.heroImageUrl || initialSettings.heroImageUrl)
   const [contentFile, setContentFile] = useState<File | null>(null)
   const [contentFiles, setContentFiles] = useState<File[]>([])
   const [contentFileKind, setContentFileKind] = useState<'aboutImageUrl' | 'projectImageUrl' | 'journalCoverUrl' | 'journalVideoUrl' | 'heroImagesJson' | 'projectImagesJson' | null>(null)
@@ -143,10 +141,8 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
     if (field === 'logo') {
       setLogoFile(file)
       setLogoPreview(preview)
-    } else {
-      setHeroFile(file)
-      setHeroPreview(preview)
-    }
+  }
+
     setMessage('')
   }
 
@@ -191,11 +187,6 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
         const logoUrl = await uploadImage(logoFile, 'logo')
         setSettings((current) => ({ ...current, logoUrl }))
         settings.logoUrl = logoUrl
-      }
-      if (heroFile) {
-        const heroImageUrl = await uploadImage(heroFile, 'hero')
-        setSettings((current) => ({ ...current, heroImageUrl }))
-        settings.heroImageUrl = heroImageUrl
       }
     } catch (error) {
       const storageError = error as {
@@ -258,8 +249,7 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
     }
 
     setLogoFile(null)
-    setHeroFile(null)
-    setMessage('Configuración guardada correctamente. Recargá el Preview para ver los cambios.')
+      setMessage('Configuración guardada correctamente. Recargá el Preview para ver los cambios.')
   }
 
   const sectionLabels = { portada: 'Portada', introduccion: 'Introducción', proyectos: 'Proyectos / oportunidades', actualidad: 'Blog / actualidad', 'sobre-mi': 'Sobre mí' }
@@ -286,9 +276,8 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
         {section === 'portada' && <>
           <label>Nombre de la marca<input value={settings.brandName} onChange={(event) => update('brandName', event.target.value)} /></label>
           <label>Logo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => selectImage('logo', event)} /><small className="admin-help">Subir imagen a Media.</small>{logoPreview && <img className="admin-image-preview admin-logo-preview" src={logoPreview} alt="Vista previa del logo" />}</label>
-          <label className="hero-media-slot">Imagen principal / hero<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectImage('hero', event)} /><small className="admin-help">Subir imagen a Media.</small>{heroPreview && <img className="admin-image-preview" src={heroPreview} alt="Vista previa hero" />}</label>
-          <label className="dropzone hero-media-slot">Agregar imágenes a la rotación<input type="file" accept="image/*" multiple onChange={selectHeroRotationFiles} /><small className="admin-help">Se suben automáticamente a Media al seleccionarlas.</small></label>
-          <small className="admin-help">Las imágenes se guardan en Media y se muestran en rotación automática.</small><div className="gallery-grid">{imageList('heroImagesJson').map((url, index) => <div className="gallery-card" key={`${url}-${index}`}><img src={url} alt={`Imagen de portada ${index + 1}`} /><div><button type="button" onClick={() => moveImage('heroImagesJson', index, -1)}>↑</button><button type="button" onClick={() => moveImage('heroImagesJson', index, 1)}>↓</button><button type="button" onClick={() => removeImage('heroImagesJson', index)}>Eliminar</button></div></div>)}</div>
+          <label className="dropzone hero-rotation-picker">Agregar imágenes a la rotación<input type="file" accept="image/*" multiple onChange={selectHeroRotationFiles} /></label>
+          <div className="gallery-grid">{imageList('heroImagesJson').map((url, index) => <div className="gallery-card" key={`${url}-${index}`}><img src={url} alt={`Imagen de portada ${index + 1}`} /><div><button type="button" onClick={() => moveImage('heroImagesJson', index, -1)}>↑</button><button type="button" onClick={() => moveImage('heroImagesJson', index, 1)}>↓</button><button type="button" onClick={() => removeImage('heroImagesJson', index)}>Eliminar</button></div></div>)}</div>
         </>}
         {section === 'sobre-mi' && <label>Fotografía<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectContentFile('aboutImageUrl', event)} /><small className="admin-help">Subir fotografía a Media.</small></label>}
         {textFields.map(([field, label]) => <label key={field} className={field.endsWith('Description') || field.endsWith('Lead') || field.endsWith('Title') ? 'full-field' : ''}>{label}{field.endsWith('Description') || field.endsWith('Lead') ? <textarea rows={4} value={settings[field]} onChange={(event) => update(field, event.target.value)} /> : <input value={settings[field]} onChange={(event) => update(field, event.target.value)} />}</label>)}
