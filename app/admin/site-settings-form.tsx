@@ -11,6 +11,27 @@ type SiteSettings = {
   heroDescription: string
   primaryColor: string
   accentColor: string
+  introTitle: string
+  introLead: string
+  introLink: string
+  propertiesTitle: string
+  propertiesLink: string
+  projectsTitle: string
+  projectsDescription: string
+  projectsLink: string
+  journalTitle: string
+  journalLink: string
+  aboutTitle: string
+  aboutLead: string
+  aboutDescription: string
+  aboutImageUrl: string
+  contactTitle: string
+  contactDescription: string
+  contactEmail: string
+  instagramUrl: string
+  linkedinUrl: string
+  whatsappUrl: string
+  footerRole: string
 }
 
 const initialSettings: SiteSettings = {
@@ -21,6 +42,10 @@ const initialSettings: SiteSettings = {
   heroDescription: 'Una mirada profesional sobre propiedades, proyectos e inversiones en Patagonia Argentina.',
   primaryColor: '#111111',
   accentColor: '#f5f5f3',
+  introTitle: 'Patagonia, con criterio.', introLead: 'Soy Carolina de Orta, Licenciada en Economía y Martillera Pública. Acompaño decisiones inmobiliarias con análisis, conocimiento del territorio y una perspectiva de largo plazo.', introLink: 'Conocer más sobre mí',
+  propertiesTitle: 'Espacios para habitar.', propertiesLink: 'Ver todas', projectsTitle: 'Ideas que toman forma.', projectsDescription: 'Desarrollos seleccionados y oportunidades para invertir en un territorio con identidad, crecimiento y horizonte.', projectsLink: 'Conocer proyectos',
+  journalTitle: 'Notas sobre el territorio.', journalLink: 'Ver actualidad', aboutTitle: 'Una forma de mirar.', aboutLead: 'La economía y el real estate se encuentran en una misma pregunta: ¿qué hace que un lugar tenga valor?', aboutDescription: 'Mi trabajo parte de escuchar, observar y traducir información compleja en decisiones claras. Con San Martín de los Andes y la Patagonia como territorio de estudio y pertenencia.', aboutImageUrl: '',
+  contactTitle: 'Hagamos lugar a una conversación.', contactDescription: 'Si estás pensando en comprar, vender o invertir en Patagonia, escribime.', contactEmail: 'hola@carolinadeorta.com', instagramUrl: '', linkedinUrl: '', whatsappUrl: '', footerRole: 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA',
 }
 
 export default function SiteSettingsForm({ initialValues }: { initialValues?: Partial<SiteSettings> }) {
@@ -171,6 +196,8 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
         <label className="full-field">Frase principal<textarea rows={3} value={settings.heroDescription} onChange={(event) => update('heroDescription', event.target.value)} /></label>
         <label>Color principal<input type="text" value={settings.primaryColor} onChange={(event) => update('primaryColor', event.target.value)} /></label>
         <label>Color de fondo<input type="text" value={settings.accentColor} onChange={(event) => update('accentColor', event.target.value)} /></label>
+        <div className="admin-subsection"><h3>Contenido de Inicio</h3><p className="admin-help">Editá textos visibles sin alterar la composición pública.</p></div>
+        {([['introTitle', 'Título introducción'], ['introLead', 'Presentación'], ['introLink', 'Botón introducción'], ['propertiesTitle', 'Título propiedades'], ['propertiesLink', 'Botón propiedades'], ['projectsTitle', 'Título proyectos'], ['projectsDescription', 'Descripción proyectos'], ['projectsLink', 'Botón proyectos'], ['journalTitle', 'Título actualidad'], ['journalLink', 'Botón actualidad'], ['aboutTitle', 'Título sobre mí'], ['aboutLead', 'Bajada sobre mí'], ['aboutDescription', 'Descripción sobre mí'], ['aboutImageUrl', 'Foto sobre mí (URL)'], ['contactTitle', 'Título contacto'], ['contactDescription', 'Texto contacto'], ['contactEmail', 'Email de contacto'], ['instagramUrl', 'Instagram (URL)'], ['linkedinUrl', 'LinkedIn (URL)'], ['whatsappUrl', 'WhatsApp (URL)'], ['footerRole', 'Texto del pie']] as const).map(([field, label]) => <label key={field} className={field.endsWith('Description') || field.endsWith('Lead') || field.endsWith('Title') ? 'full-field' : ''}>{label}{field.endsWith('Description') || field.endsWith('Lead') ? <textarea rows={3} value={settings[field]} onChange={(event) => update(field, event.target.value)} /> : <input value={settings[field]} onChange={(event) => update(field, event.target.value)} />}</label>)}
         <div className="form-actions"><button className="admin-button" type="submit">Guardar configuración</button>{message && <span className="admin-success">{message}</span>}</div>
       </form>
     </section>

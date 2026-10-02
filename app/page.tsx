@@ -20,6 +20,7 @@ type SiteSettings = {
   heroImageUrl?: string
   heroTitle?: string
   heroDescription?: string
+  introTitle?: string; introLead?: string; introLink?: string; propertiesTitle?: string; propertiesLink?: string; projectsTitle?: string; projectsDescription?: string; projectsLink?: string; journalTitle?: string; journalLink?: string; aboutTitle?: string; aboutLead?: string; aboutDescription?: string; aboutImageUrl?: string; contactTitle?: string; contactDescription?: string; contactEmail?: string; instagramUrl?: string; linkedinUrl?: string; whatsappUrl?: string; footerRole?: string
 }
 
 export default async function Page() {
@@ -37,7 +38,7 @@ export default async function Page() {
     else properties = propertyData ?? []
     if (settingsError) console.error('[v0] site_settings load error:', settingsError.message)
 
-    const allowedKeys = new Set<keyof SiteSettings>(['brandName', 'logoUrl', 'heroImageUrl', 'heroTitle', 'heroDescription'])
+    const allowedKeys = new Set<keyof SiteSettings>(['brandName', 'logoUrl', 'heroImageUrl', 'heroTitle', 'heroDescription', 'introTitle', 'introLead', 'introLink', 'propertiesTitle', 'propertiesLink', 'projectsTitle', 'projectsDescription', 'projectsLink', 'journalTitle', 'journalLink', 'aboutTitle', 'aboutLead', 'aboutDescription', 'aboutImageUrl', 'contactTitle', 'contactDescription', 'contactEmail', 'instagramUrl', 'linkedinUrl', 'whatsappUrl', 'footerRole'])
     for (const setting of settingData ?? []) {
       if (allowedKeys.has(setting.key as keyof SiteSettings)) settings[setting.key as keyof SiteSettings] = setting.value
     }
