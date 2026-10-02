@@ -32,6 +32,9 @@ type SiteSettings = {
   linkedinUrl: string
   whatsappUrl: string
   footerRole: string
+  projectImageUrl: string
+  journalCoverUrl: string
+  journalVideoUrl: string
 }
 
 const initialSettings: SiteSettings = {
@@ -45,20 +48,38 @@ const initialSettings: SiteSettings = {
   introTitle: 'Patagonia, con criterio.', introLead: 'Soy Carolina de Orta, Licenciada en Economía y Martillera Pública. Acompaño decisiones inmobiliarias con análisis, conocimiento del territorio y una perspectiva de largo plazo.', introLink: 'Conocer más sobre mí',
   propertiesTitle: 'Espacios para habitar.', propertiesLink: 'Ver todas', projectsTitle: 'Ideas que toman forma.', projectsDescription: 'Desarrollos seleccionados y oportunidades para invertir en un territorio con identidad, crecimiento y horizonte.', projectsLink: 'Conocer proyectos',
   journalTitle: 'Notas sobre el territorio.', journalLink: 'Ver actualidad', aboutTitle: 'Una forma de mirar.', aboutLead: 'La economía y el real estate se encuentran en una misma pregunta: ¿qué hace que un lugar tenga valor?', aboutDescription: 'Mi trabajo parte de escuchar, observar y traducir información compleja en decisiones claras. Con San Martín de los Andes y la Patagonia como territorio de estudio y pertenencia.', aboutImageUrl: '',
-  contactTitle: 'Hagamos lugar a una conversación.', contactDescription: 'Si estás pensando en comprar, vender o invertir en Patagonia, escribime.', contactEmail: 'hola@carolinadeorta.com', instagramUrl: '', linkedinUrl: '', whatsappUrl: '', footerRole: 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA',
+  contactTitle: 'Hagamos lugar a una conversación.', contactDescription: 'Si estás pensando en comprar, vender o invertir en Patagonia, escribime.', contactEmail: 'hola@carolinadeorta.com', instagramUrl: '', linkedinUrl: '', whatsappUrl: '', footerRole: 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA', projectImageUrl: '', journalCoverUrl: '', journalVideoUrl: '',
 }
 
-export default function SiteSettingsForm({ initialValues }: { initialValues?: Partial<SiteSettings> }) {
+export type CmsSection = 'portada' | 'introduccion' | 'proyectos' | 'actualidad' | 'sobre-mi'
+
+export default function SiteSettingsForm({ initialValues, section }: { initialValues?: Partial<SiteSettings>; section: CmsSection }) {
   const [settings, setSettings] = useState({ ...initialSettings, ...initialValues })
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [heroFile, setHeroFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState(initialValues?.logoUrl || '')
   const [heroPreview, setHeroPreview] = useState(initialValues?.heroImageUrl || initialSettings.heroImageUrl)
+  const [contentFile, setContentFile] = useState<File | null>(null)
+  const [contentFileKind, setContentFileKind] = useState<'aboutImageUrl' | 'projectImageUrl' | 'journalCoverUrl' | 'journalVideoUrl' | null>(null)
   const [message, setMessage] = useState('')
 
   function update(field: keyof SiteSettings, value: string) {
     setSettings((current) => ({ ...current, [field]: value }))
     setMessage('')
+  }
+
+  function selectContentFile(kind: NonNullable<typeof contentFileKind>, event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (file) { setContentFile(file); setContentFileKind(kind) }
+  }
+
+  async function uploadContentFile(file: File, kind: string) {
+    const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin'
+    const path = `cms/${kind}/${crypto.randomUUID()}.${extension}`
+    const supabase = createClient()
+    const { data, error } = await supabase.storage.from('Media').upload(path, file, { upsert: false, contentType: file.type || 'application/octet-stream' })
+    if (error) throw error
+    return supabase.storage.from('Media').getPublicUrl(data.path).data.publicUrl
   }
 
   function selectImage(field: 'logo' | 'hero', event: ChangeEvent<HTMLInputElement>) {
@@ -104,6 +125,10 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
     setMessage('Guardando configuración...')
 
     try {
+      if (contentFile && contentFileKind) {
+        const uploadedUrl = await uploadContentFile(contentFile, contentFileKind)
+        settings[contentFileKind] = uploadedUrl
+      }
       if (logoFile) {
         const logoUrl = await uploadImage(logoFile, 'logo')
         setSettings((current) => ({ ...current, logoUrl }))
@@ -179,26 +204,39 @@ export default function SiteSettingsForm({ initialValues }: { initialValues?: Pa
     setMessage('Configuración guardada correctamente. Recargá el Preview para ver los cambios.')
   }
 
+  const sectionLabels = { portada: 'Portada', introduccion: 'Introducción', proyectos: 'Proyectos / oportunidades', actualidad: 'Blog / actualidad', 'sobre-mi': 'Sobre mí' }
+  const sectionFields = {
+    portada: ['brandName', 'logoUrl', 'heroImageUrl', 'heroTitle', 'heroDescription', 'primaryColor', 'accentColor'],
+    introduccion: ['introTitle', 'introLead', 'introLink'],
+    proyectos: ['projectsTitle', 'projectsDescription', 'projectsLink'],
+    actualidad: ['journalTitle', 'journalLink'],
+    'sobre-mi': ['aboutTitle', 'aboutLead', 'aboutDescription', 'aboutImageUrl', 'footerRole'],
+  } as const
+  const activeFields = sectionFields[section]
+  const textFields = ([['introTitle', 'Título'], ['introLead', 'Presentación'], ['introLink', 'Botón'], ['propertiesTitle', 'Título propiedades'], ['propertiesLink', 'Botón propiedades'], ['projectsTitle', 'Título'], ['projectsDescription', 'Descripción'], ['projectsLink', 'Botón'], ['journalTitle', 'Título'], ['journalLink', 'Botón'], ['aboutTitle', 'Título'], ['aboutLead', 'Bajada'], ['aboutDescription', 'Descripción'], ['footerRole', 'Texto del pie']] as const).filter(([field]) => activeFields.includes(field as never))
+
   return (
     <section className="admin-panel">
       <div className="admin-panel-heading">
         <div>
-          <p className="admin-eyebrow">IDENTIDAD</p>
-          <h2>Configuración general</h2>
+          <p className="admin-eyebrow">CMS · {sectionLabels[section]}</p>
+          <h2>{sectionLabels[section]}</h2>
         </div>
         <span className="admin-panel-note">Preparado para Supabase</span>
       </div>
       <form className="property-form" onSubmit={save}>
-        <label>Nombre de la marca<input value={settings.brandName} onChange={(event) => update('brandName', event.target.value)} /></label>
-        <label>Logo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => selectImage('logo', event)} /><small className="admin-help">Si no seleccionás un archivo, se conserva el logo actual.</small>{logoPreview && <img className="admin-image-preview admin-logo-preview" src={logoPreview} alt="Vista previa del logo" />}</label>
-        <label>Imagen principal / hero<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectImage('hero', event)} /><small className="admin-help">Si no seleccionás un archivo, se conserva la imagen actual.</small>{heroPreview && <img className="admin-image-preview" src={heroPreview} alt="Vista previa de la imagen principal" />}</label>
-        <label className="full-field">Título principal<input value={settings.heroTitle} onChange={(event) => update('heroTitle', event.target.value)} /></label>
-        <label className="full-field">Frase principal<textarea rows={3} value={settings.heroDescription} onChange={(event) => update('heroDescription', event.target.value)} /></label>
-        <label>Color principal<input type="text" value={settings.primaryColor} onChange={(event) => update('primaryColor', event.target.value)} /></label>
-        <label>Color de fondo<input type="text" value={settings.accentColor} onChange={(event) => update('accentColor', event.target.value)} /></label>
-        <div className="admin-subsection"><h3>Contenido de Inicio</h3><p className="admin-help">Editá textos visibles sin alterar la composición pública.</p></div>
-        {([['introTitle', 'Título introducción'], ['introLead', 'Presentación'], ['introLink', 'Botón introducción'], ['propertiesTitle', 'Título propiedades'], ['propertiesLink', 'Botón propiedades'], ['projectsTitle', 'Título proyectos'], ['projectsDescription', 'Descripción proyectos'], ['projectsLink', 'Botón proyectos'], ['journalTitle', 'Título actualidad'], ['journalLink', 'Botón actualidad'], ['aboutTitle', 'Título sobre mí'], ['aboutLead', 'Bajada sobre mí'], ['aboutDescription', 'Descripción sobre mí'], ['aboutImageUrl', 'Foto sobre mí (URL)'], ['contactTitle', 'Título contacto'], ['contactDescription', 'Texto contacto'], ['contactEmail', 'Email de contacto'], ['instagramUrl', 'Instagram (URL)'], ['linkedinUrl', 'LinkedIn (URL)'], ['whatsappUrl', 'WhatsApp (URL)'], ['footerRole', 'Texto del pie']] as const).map(([field, label]) => <label key={field} className={field.endsWith('Description') || field.endsWith('Lead') || field.endsWith('Title') ? 'full-field' : ''}>{label}{field.endsWith('Description') || field.endsWith('Lead') ? <textarea rows={3} value={settings[field]} onChange={(event) => update(field, event.target.value)} /> : <input value={settings[field]} onChange={(event) => update(field, event.target.value)} />}</label>)}
-        <div className="form-actions"><button className="admin-button" type="submit">Guardar configuración</button>{message && <span className="admin-success">{message}</span>}</div>
+        {section === 'portada' && <>
+          <label>Nombre de la marca<input value={settings.brandName} onChange={(event) => update('brandName', event.target.value)} /></label>
+          <label>Logo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => selectImage('logo', event)} /><small className="admin-help">Subir imagen a Media.</small>{logoPreview && <img className="admin-image-preview admin-logo-preview" src={logoPreview} alt="Vista previa del logo" />}</label>
+          <label>Imagen principal / hero<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectImage('hero', event)} /><small className="admin-help">Subir imagen a Media.</small>{heroPreview && <img className="admin-image-preview" src={heroPreview} alt="Vista previa hero" />}</label>
+          <label className="full-field">Título principal<input value={settings.heroTitle} onChange={(event) => update('heroTitle', event.target.value)} /></label>
+          <label className="full-field">Frase principal<textarea rows={3} value={settings.heroDescription} onChange={(event) => update('heroDescription', event.target.value)} /></label>
+        </>}
+        {section === 'sobre-mi' && <label>Fotografía<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectContentFile('aboutImageUrl', event)} /><small className="admin-help">Subir fotografía a Media.</small></label>}
+        {textFields.map(([field, label]) => <label key={field} className={field.endsWith('Description') || field.endsWith('Lead') || field.endsWith('Title') ? 'full-field' : ''}>{label}{field.endsWith('Description') || field.endsWith('Lead') ? <textarea rows={4} value={settings[field]} onChange={(event) => update(field, event.target.value)} /> : <input value={settings[field]} onChange={(event) => update(field, event.target.value)} />}</label>)}
+        {section === 'proyectos' && <><div className="admin-subsection"><h3>Imágenes de proyectos</h3></div><label className="dropzone">Subir imágenes a Media<input type="file" accept="image/*" onChange={(event) => selectContentFile('projectImageUrl', event)} /></label></>}
+        {section === 'actualidad' && <><div className="admin-subsection"><h3>Publicaciones</h3><p className="admin-help">Arquitectura preparada para títulos, bajadas, contenido, fecha, categoría, estado, imagen y video.</p></div><label>Imagen de portada<input type="file" accept="image/*" onChange={(event) => selectContentFile('journalCoverUrl', event)} /></label><label>Video<input type="file" accept="video/*" onChange={(event) => selectContentFile('journalVideoUrl', event)} /></label><label>Título<input value={settings.journalTitle} onChange={(event) => update('journalTitle', event.target.value)} /></label></>}
+        <div className="form-actions"><button className="admin-button" type="submit">Guardar {sectionLabels[section]}</button>{message && <span className="admin-success">{message}</span>}</div>
       </form>
     </section>
   )
