@@ -50,7 +50,8 @@ type SiteSettings = {
   journalKicker?: string; journalTitle?: string; journalLink?: string; journalCta?: string
   aboutKicker?: string; aboutTitle?: string; aboutLead?: string; aboutDescription?: string; aboutImageUrl?: string; aboutCta?: string
   contactKicker?: string; footerRole?: string
-  contactTitle?: string; contactDescription?: string; contactEmail?: string; instagramUrl?: string; linkedinUrl?: string; whatsappUrl?: string
+  menuProperties?: string; menuProjects?: string; menuJournal?: string; menuAbout?: string; menuContact?: string
+  contactTitle?: string; contactDescription?: string; contactEmail?: string; instagramUrl?: string; linkedinUrl?: string; whatsappUrl?: string; contactInstagram?: string; contactLinkedin?: string; contactWhatsapp?: string
 }
 
 export function SiteHome({ properties, settings }: { properties: Property[]; settings?: SiteSettings }) {
@@ -94,9 +95,9 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
   return (
     <main className="site-shell">
       <header className="site-header">
-        <a className="brand" href="#inicio" aria-label={`${brandName}, inicio`}><span>{brandName}</span></a>
+        <a className="brand" href="#inicio" aria-label={`${brandName}, inicio`}>{settings?.logoUrl ? <Image className="brand-logo" src={settings.logoUrl} alt={brandName} width={180} height={54} priority /> : <span>{brandName}</span>}</a>
         <nav className={menuOpen ? 'main-nav is-open' : 'main-nav'} aria-label="Navegación principal">
-          {['Propiedades', 'Proyectos', 'Actualidad', 'Sobre mí', 'Contacto'].map((item) => <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`} onClick={() => setMenuOpen(false)}>{item}</a>)}
+          {[[settings?.menuProperties || 'Propiedades', '#propiedades'], [settings?.menuProjects || 'Proyectos', '#proyectos'], [settings?.menuJournal || 'Actualidad', '#actualidad'], [settings?.menuAbout || 'Sobre mí', '#sobre-mí'], [settings?.menuContact || 'Contacto', '#contacto']].map(([item, href]) => <a key={item} href={href} onClick={() => setMenuOpen(false)}>{item}</a>)}
         </nav>
         <button className="menu-toggle" aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
       </header>
@@ -118,7 +119,7 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
 
       <section id="sobre-mí" className="about-section section-pad gray-section"><div className="about-image"><Image src={settings?.aboutImageUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=85'} alt="Retrato editorial de Carolina de Orta" fill sizes="(max-width: 800px) 100vw, 35vw" /></div><div className="about-copy"><div className="section-kicker">{settings?.aboutKicker || '05 / SOBRE MÍ'}</div><h2>{aboutTitle}</h2><p className="lead">{aboutLead}</p><p>{aboutDescription}</p><a href="#contacto" className="text-link">{settings?.aboutCta || 'Hablemos'} <ArrowRight size={16} /></a></div></section>
 
-      <section id="contacto" className="contact-section section-pad"><div className="section-kicker light">{settings?.contactKicker || '06 / CONTACTO'}</div><div className="contact-grid"><h2>{contactTitle}</h2><div><p>{contactDescription}</p><a href={`mailto:${contactEmail}`} className="contact-email">{contactEmail} <ArrowRight size={18} /></a><div className="socials"><a href="#contacto" aria-label="Instagram">IG</a><a href="#contacto" aria-label="LinkedIn">in</a><a href="#contacto" aria-label="WhatsApp"><Plus size={18} /></a></div></div></div></section>
+      <section id="contacto" className="contact-section section-pad"><div className="section-kicker light">{settings?.contactKicker || '06 / CONTACTO'}</div><div className="contact-grid"><h2>{contactTitle}</h2><div><p>{contactDescription}</p><a href={`mailto:${contactEmail}`} className="contact-email">{contactEmail} <ArrowRight size={18} /></a><div className="socials"><a href={settings?.contactInstagram || settings?.instagramUrl || '#contacto'} aria-label="Instagram">IG</a><a href={settings?.contactLinkedin || settings?.linkedinUrl || '#contacto'} aria-label="LinkedIn">in</a><a href={settings?.contactWhatsapp || settings?.whatsappUrl || '#contacto'} aria-label="WhatsApp"><Plus size={18} /></a></div></div></div></section>
 
       <footer className="site-footer"><span>© {new Date().getFullYear()} CAROLINA DE ORTA</span><span>{settings?.footerRole || 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA'}</span><a href="#inicio">Volver arriba ↑</a></footer>
     </main>

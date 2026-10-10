@@ -173,11 +173,8 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
 
     if (error) throw error
     if (!data?.path) throw new Error('Supabase Storage no devolvió el path del archivo subido.')
-    console.log('Uploaded path:', data.path)
-
     const { data: publicUrl } = supabase.storage.from('Media').getPublicUrl(data.path)
     if (!publicUrl?.publicUrl) throw new Error('Supabase Storage no devolvió una URL pública.')
-    console.log('Generated public URL:', publicUrl.publicUrl)
     return publicUrl.publicUrl
   }
 
@@ -223,7 +220,6 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
     const entries = Object.entries(settings) as [keyof SiteSettings, string][]
 
     for (const [key, value] of entries) {
-      console.log('Saving site_settings value:', { key, value })
       const { data: existing, error: lookupError } = await supabase
         .from('site_settings')
         .select('id')
@@ -256,7 +252,6 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
         setMessage(`Error verificando site_settings: ${verifyError.message}`)
         return
       }
-      console.log('Saved site_settings value:', { key, value: saved?.value })
     }
 
     setLogoFile(null)
@@ -288,7 +283,7 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
         {section === 'portada' && <>
           <label>Nombre de la marca<input value={settings.brandName} onChange={(event) => update('brandName', event.target.value)} /></label>
           <label>Logo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => selectImage('logo', event)} /><small className="admin-help">Subir imagen a Media.</small>{logoPreview && <img className="admin-image-preview admin-logo-preview" src={logoPreview} alt="Vista previa del logo" />}</label>
-          <label className="dropzone hero-rotation-picker">Agregar imágenes a la rotación<input type="file" accept="image/*" multiple onChange={selectHeroRotationFiles} /></label>
+          <label className="dropzone hero-rotation-picker">Agregar imágenes a la rotaci��n<input type="file" accept="image/*" multiple onChange={selectHeroRotationFiles} /></label>
           <div className="gallery-grid">{imageList('heroImagesJson').map((url, index) => <div className="gallery-card" key={`${url}-${index}`}><img src={url} alt={`Imagen de portada ${index + 1}`} /><div><button type="button" onClick={() => moveImage('heroImagesJson', index, -1)}>↑</button><button type="button" onClick={() => moveImage('heroImagesJson', index, 1)}>↓</button><button type="button" onClick={() => removeImage('heroImagesJson', index)}>Eliminar</button></div></div>)}</div>
         </>}
         {section === 'contacto' && <><div className="admin-subsection"><h3>Enlaces públicos</h3><p className="admin-help">Pegá aquí las URLs reales de tus perfiles y el enlace completo de WhatsApp.</p></div><label>Instagram (URL)<input value={settings.contactInstagram} onChange={(event) => update('contactInstagram', event.target.value)} /></label><label>LinkedIn (URL)<input value={settings.contactLinkedin} onChange={(event) => update('contactLinkedin', event.target.value)} /></label><label>WhatsApp (URL)<input value={settings.contactWhatsapp} onChange={(event) => update('contactWhatsapp', event.target.value)} /></label></>}
