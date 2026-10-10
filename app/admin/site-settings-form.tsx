@@ -51,6 +51,17 @@ type SiteSettings = {
   aboutCta: string
   contactCta: string
   heroKicker: string
+  menuProperties: string
+  menuProjects: string
+  menuJournal: string
+  menuAbout: string
+  menuContact: string
+  propertyTypesJson: string
+  propertyOperationsJson: string
+  propertyZonesJson: string
+  contactInstagram: string
+  contactLinkedin: string
+  contactWhatsapp: string
 }
 
 const initialSettings: SiteSettings = {
@@ -64,10 +75,10 @@ const initialSettings: SiteSettings = {
   introTitle: 'Patagonia, con criterio.', introLead: 'Soy Carolina de Orta, Licenciada en Economía y Martillera Pública. Acompaño decisiones inmobiliarias con análisis, conocimiento del territorio y una perspectiva de largo plazo.', introLink: 'Conocer más sobre mí',
   propertiesTitle: 'Espacios para habitar.', propertiesLink: 'Ver todas', projectsTitle: 'Ideas que toman forma.', projectsDescription: 'Desarrollos seleccionados y oportunidades para invertir en un territorio con identidad, crecimiento y horizonte.', projectsLink: 'Conocer proyectos',
   journalTitle: 'Notas sobre el territorio.', journalLink: 'Ver actualidad', aboutTitle: 'Una forma de mirar.', aboutLead: 'La economía y el real estate se encuentran en una misma pregunta: ¿qué hace que un lugar tenga valor?', aboutDescription: 'Mi trabajo parte de escuchar, observar y traducir información compleja en decisiones claras. Con San Martín de los Andes y la Patagonia como territorio de estudio y pertenencia.', aboutImageUrl: '',
-  contactTitle: 'Hagamos lugar a una conversación.', contactDescription: 'Si estás pensando en comprar, vender o invertir en Patagonia, escribime.', contactEmail: 'hola@carolinadeorta.com', instagramUrl: '', linkedinUrl: '', whatsappUrl: '', footerRole: 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA', projectImageUrl: '', journalCoverUrl: '', journalVideoUrl: '', heroImagesJson: '[]', projectImagesJson: '[]', introKicker: '01 / UNA MIRADA PROPIA', propertiesKicker: '02 / PROPIEDADES', projectsKicker: '03 / PROYECTOS', journalKicker: '04 / ACTUALIDAD', aboutKicker: '05 / SOBRE MÍ', contactKicker: '06 / CONTACTO', heroKicker: 'REAL ESTATE · ECONOMÍA · PATAGONIA', heroCta: 'Explorar propiedades', introCta: 'Conocer más sobre mí', propertiesCta: 'Ver todas', projectsCta: 'Conocer proyectos', journalCta: 'Ver actualidad', aboutCta: 'Hablemos', contactCta: 'Escribime',
+  contactTitle: 'Hagamos lugar a una conversación.', contactDescription: 'Si estás pensando en comprar, vender o invertir en Patagonia, escribime.', contactEmail: 'hola@carolinadeorta.com', instagramUrl: '', linkedinUrl: '', whatsappUrl: '', footerRole: 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA', projectImageUrl: '', journalCoverUrl: '', journalVideoUrl: '', heroImagesJson: '[]', projectImagesJson: '[]', introKicker: '01 / UNA MIRADA PROPIA', propertiesKicker: '02 / PROPIEDADES', projectsKicker: '03 / PROYECTOS', journalKicker: '04 / ACTUALIDAD', aboutKicker: '05 / SOBRE MÍ', contactKicker: '06 / CONTACTO', heroKicker: 'REAL ESTATE · ECONOMÍA · PATAGONIA', heroCta: 'Explorar propiedades', introCta: 'Conocer más sobre mí', propertiesCta: 'Ver todas', projectsCta: 'Conocer proyectos', journalCta: 'Ver actualidad', aboutCta: 'Hablemos', contactCta: 'Escribime', menuProperties: 'PROPIEDADES', menuProjects: 'PROYECTOS', menuJournal: 'ACTUALIDAD', menuAbout: 'SOBRE MÍ', menuContact: 'CONTACTO', propertyTypesJson: '["Casa","Departamento","PH","Terreno","Local"]', propertyOperationsJson: '["Venta","Alquiler"]', propertyZonesJson: '[]', contactInstagram: '', contactLinkedin: '', contactWhatsapp: '',
 }
 
-export type CmsSection = 'portada' | 'introduccion' | 'proyectos' | 'actualidad' | 'sobre-mi'
+export type CmsSection = 'portada' | 'introduccion' | 'proyectos' | 'actualidad' | 'sobre-mi' | 'contacto'
 
 export default function SiteSettingsForm({ initialValues, section }: { initialValues?: Partial<SiteSettings>; section: CmsSection }) {
   const [settings, setSettings] = useState({ ...initialSettings, ...initialValues })
@@ -252,16 +263,17 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
       setMessage('Configuración guardada correctamente. Recargá el Preview para ver los cambios.')
   }
 
-  const sectionLabels = { portada: 'Portada', introduccion: 'Introducción', proyectos: 'Proyectos / oportunidades', actualidad: 'Blog / actualidad', 'sobre-mi': 'Sobre mí' }
+  const sectionLabels = { portada: 'Portada', introduccion: 'Introducción', proyectos: 'Proyectos / oportunidades', actualidad: 'Blog / actualidad', 'sobre-mi': 'Sobre mí', contacto: 'Contacto' }
   const sectionFields = {
     portada: ['brandName', 'heroTitle', 'heroDescription', 'heroCta', 'heroKicker'],
     introduccion: ['introKicker', 'introTitle', 'introLead', 'introCta'],
     proyectos: ['projectsKicker', 'projectsTitle', 'projectsDescription', 'projectsCta'],
     actualidad: ['journalKicker', 'journalTitle', 'journalCta'],
     'sobre-mi': ['aboutKicker', 'aboutTitle', 'aboutLead', 'aboutDescription', 'aboutCta', 'footerRole'],
+    contacto: ['contactKicker', 'contactTitle', 'contactDescription', 'contactEmail', 'contactCta', 'contactInstagram', 'contactLinkedin', 'contactWhatsapp'],
   } as const
   const activeFields = sectionFields[section]
-  const textFields = ([['heroKicker', 'Bajada hero'], ['heroTitle', 'Título hero'], ['heroDescription', 'Descripción hero'], ['heroCta', 'CTA hero'], ['introKicker', 'Kicker introducción'], ['introTitle', 'Título'], ['introLead', 'Presentación'], ['introCta', 'CTA'], ['projectsKicker', 'Kicker proyectos'], ['projectsTitle', 'Título'], ['projectsDescription', 'Descripción'], ['projectsCta', 'CTA'], ['journalKicker', 'Kicker actualidad'], ['journalTitle', 'Título'], ['journalCta', 'CTA'], ['aboutKicker', 'Kicker sobre mí'], ['aboutTitle', 'Título'], ['aboutLead', 'Bajada'], ['aboutDescription', 'Descripción'], ['aboutCta', 'CTA'], ['footerRole', 'Texto del pie']] as const).filter(([field]) => activeFields.includes(field as never))
+  const textFields = ([['menuProperties', 'Menú propiedades'], ['menuProjects', 'Menú proyectos'], ['menuJournal', 'Menú actualidad'], ['menuAbout', 'Menú sobre mí'], ['menuContact', 'Menú contacto'], ['heroKicker', 'Bajada hero'], ['heroTitle', 'Título hero'], ['heroDescription', 'Descripción hero'], ['heroCta', 'CTA hero'], ['introKicker', 'Kicker introducción'], ['introTitle', 'Título'], ['introLead', 'Presentación'], ['introCta', 'CTA'], ['projectsKicker', 'Kicker proyectos'], ['projectsTitle', 'Título'], ['projectsDescription', 'Descripción'], ['projectsCta', 'CTA'], ['journalKicker', 'Kicker actualidad'], ['journalTitle', 'Título'], ['journalCta', 'CTA'], ['aboutKicker', 'Kicker sobre mí'], ['aboutTitle', 'Título'], ['aboutLead', 'Bajada'], ['aboutDescription', 'Descripción'], ['aboutCta', 'CTA'], ['footerRole', 'Texto del pie']] as const).filter(([field]) => activeFields.includes(field as never))
 
   return (
     <section className="admin-panel">
@@ -279,6 +291,7 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
           <label className="dropzone hero-rotation-picker">Agregar imágenes a la rotación<input type="file" accept="image/*" multiple onChange={selectHeroRotationFiles} /></label>
           <div className="gallery-grid">{imageList('heroImagesJson').map((url, index) => <div className="gallery-card" key={`${url}-${index}`}><img src={url} alt={`Imagen de portada ${index + 1}`} /><div><button type="button" onClick={() => moveImage('heroImagesJson', index, -1)}>↑</button><button type="button" onClick={() => moveImage('heroImagesJson', index, 1)}>↓</button><button type="button" onClick={() => removeImage('heroImagesJson', index)}>Eliminar</button></div></div>)}</div>
         </>}
+        {section === 'contacto' && <><div className="admin-subsection"><h3>Enlaces públicos</h3><p className="admin-help">Pegá aquí las URLs reales de tus perfiles y el enlace completo de WhatsApp.</p></div><label>Instagram (URL)<input value={settings.contactInstagram} onChange={(event) => update('contactInstagram', event.target.value)} /></label><label>LinkedIn (URL)<input value={settings.contactLinkedin} onChange={(event) => update('contactLinkedin', event.target.value)} /></label><label>WhatsApp (URL)<input value={settings.contactWhatsapp} onChange={(event) => update('contactWhatsapp', event.target.value)} /></label></>}
         {section === 'sobre-mi' && <label>Fotografía<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectContentFile('aboutImageUrl', event)} /><small className="admin-help">Subir fotografía a Media.</small></label>}
         {textFields.map(([field, label]) => <label key={field} className={field.endsWith('Description') || field.endsWith('Lead') || field.endsWith('Title') ? 'full-field' : ''}>{label}{field.endsWith('Description') || field.endsWith('Lead') ? <textarea rows={4} value={settings[field]} onChange={(event) => update(field, event.target.value)} /> : <input value={settings[field]} onChange={(event) => update(field, event.target.value)} />}</label>)}
         {section === 'proyectos' && <><div className="admin-subsection"><h3>Imágenes de proyectos</h3></div><label className="dropzone">Subir imágenes a Media<input type="file" accept="image/*" multiple onChange={(event) => selectContentFile('projectImagesJson', event)} /></label><div className="gallery-grid">{imageList('projectImagesJson').map((url, index) => <div className="gallery-card" key={`${url}-${index}`}><img src={url} alt={`Imagen de proyecto ${index + 1}`} /><div><button type="button" onClick={() => moveImage('projectImagesJson', index, -1)}>↑</button><button type="button" onClick={() => moveImage('projectImagesJson', index, 1)}>↓</button><button type="button" onClick={() => removeImage('projectImagesJson', index)}>Eliminar</button></div></div>)}</div></>}
