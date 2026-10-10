@@ -51,7 +51,7 @@ type SiteSettings = {
   aboutKicker?: string; aboutTitle?: string; aboutLead?: string; aboutDescription?: string; aboutImageUrl?: string; aboutCta?: string
   contactKicker?: string; footerRole?: string
   menuProperties?: string; menuProjects?: string; menuJournal?: string; menuAbout?: string; menuContact?: string
-  contactTitle?: string; contactDescription?: string; contactEmail?: string; instagramUrl?: string; linkedinUrl?: string; whatsappUrl?: string; contactInstagram?: string; contactLinkedin?: string; contactWhatsapp?: string
+  contactTitle?: string; contactDescription?: string; contactEmail?: string; instagramUrl?: string; linkedinUrl?: string; whatsappUrl?: string; contactInstagram?: string; contactLinkedin?: string; contactWhatsapp?: string; footerBrand?: string; footerAddress?: string; footerLegal?: string; footerCredit?: string
 }
 
 export function SiteHome({ properties, settings }: { properties: Property[]; settings?: SiteSettings }) {
@@ -121,7 +121,7 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
 
       <section id="contacto" className="contact-section section-pad"><div className="section-kicker light">{settings?.contactKicker || '06 / CONTACTO'}</div><div className="contact-grid"><h2>{contactTitle}</h2><div><p>{contactDescription}</p><a href={`mailto:${contactEmail}`} className="contact-email">{contactEmail} <ArrowRight size={18} /></a><div className="socials"><a href={settings?.contactInstagram || settings?.instagramUrl || '#contacto'} aria-label="Instagram">IG</a><a href={settings?.contactLinkedin || settings?.linkedinUrl || '#contacto'} aria-label="LinkedIn">in</a><a href={settings?.contactWhatsapp || settings?.whatsappUrl || '#contacto'} aria-label="WhatsApp"><Plus size={18} /></a></div></div></div></section>
 
-      <footer className="site-footer"><span>© {new Date().getFullYear()} CAROLINA DE ORTA</span><span>{settings?.footerRole || 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA'}</span><a href="#inicio">Volver arriba ↑</a></footer>
+      <footer className="site-footer"><span>© {new Date().getFullYear()} {settings?.footerBrand || 'CAROLINA DE ORTA'}</span><span>{settings?.footerRole || 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA'}{settings?.footerAddress ? ` · ${settings.footerAddress}` : ''}</span>{settings?.footerLegal && <span>{settings.footerLegal}</span>}<a href="#inicio">{settings?.footerCredit || 'Volver arriba ↑'}</a></footer>
     </main>
   )
 }
