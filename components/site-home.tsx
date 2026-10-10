@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { ArrowDown, ArrowRight, Menu, Play, Plus, X } from 'lucide-react'
+import { WhatsAppFloat } from './whatsapp-float'
 import { useEffect, useState } from 'react'
 
 type Property = {
@@ -121,6 +122,7 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
 
       <section id="contacto" className="contact-section section-pad"><div className="section-kicker light">{settings?.contactKicker || '06 / CONTACTO'}</div><div className="contact-grid"><h2>{contactTitle}</h2><div><p>{contactDescription}</p><a href={`mailto:${contactEmail}`} className="contact-email">{contactEmail} <ArrowRight size={18} /></a><div className="socials"><a href={settings?.contactInstagram || settings?.instagramUrl || '#contacto'} aria-label="Instagram">IG</a><a href={settings?.contactLinkedin || settings?.linkedinUrl || '#contacto'} aria-label="LinkedIn">in</a><a href={settings?.contactWhatsapp || settings?.whatsappUrl || '#contacto'} aria-label="WhatsApp"><Plus size={18} /></a></div></div></div></section>
 
+      <WhatsAppFloat url={settings?.contactWhatsapp} />
       <footer className="site-footer"><span>© {new Date().getFullYear()} {settings?.footerBrand || 'CAROLINA DE ORTA'}</span><span>{settings?.footerRole || 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA'}{settings?.footerAddress ? ` · ${settings.footerAddress}` : ''}</span>{settings?.footerLegal && <span>{settings.footerLegal}</span>}<a href="#inicio">{settings?.footerCredit || 'Volver arriba ↑'}</a></footer>
     </main>
   )

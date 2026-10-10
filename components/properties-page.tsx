@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
+import { WhatsAppFloat } from './whatsapp-float'
 
 type Property = {
   id: string
@@ -30,7 +31,7 @@ function displayArea(value: string | number | null | undefined) {
   return /m²|m2/i.test(text) ? text : `${text} m²`
 }
 
-export function PropertiesPage({ properties, images, filterOptions }: { properties: Property[]; images: PropertyImage[]; filterOptions?: { operations: string[]; types: string[]; zones: string[] } }) {
+export function PropertiesPage({ properties, images, filterOptions, whatsappUrl }: { properties: Property[]; images: PropertyImage[]; filterOptions?: { operations: string[]; types: string[]; zones: string[] }; whatsappUrl?: string }) {
   const [operation, setOperation] = useState('')
   const [type, setType] = useState('')
   const [zone, setZone] = useState('')
@@ -62,6 +63,7 @@ export function PropertiesPage({ properties, images, filterOptions }: { properti
         })}
         {!filteredProperties.length && <p className="properties-empty">No hay propiedades que coincidan con los filtros.</p>}
       </section>
+      <WhatsAppFloat url={whatsappUrl} />
       <footer className="site-footer"><span>© {new Date().getFullYear()} CAROLINA DE ORTA</span><a href="/">Volver al inicio ↑</a></footer>
     </main>
   )

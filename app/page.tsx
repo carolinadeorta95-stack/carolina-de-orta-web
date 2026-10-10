@@ -25,7 +25,7 @@ type SiteSettings = {
   heroKicker?: string
   heroCta?: string
   introKicker?: string; propertiesKicker?: string; projectsKicker?: string; journalKicker?: string; aboutKicker?: string; contactKicker?: string
-  introCta?: string; propertiesCta?: string; projectsCta?: string; journalCta?: string; aboutCta?: string; contactCta?: string; projectImagesJson?: string; menuProperties?: string; menuProjects?: string; menuJournal?: string; menuAbout?: string; menuContact?: string; contactInstagram?: string; contactLinkedin?: string; contactWhatsapp?: string; footerBrand?: string; footerAddress?: string; footerLegal?: string; footerCredit?: string
+  introCta?: string; propertiesCta?: string; projectsCta?: string; journalCta?: string; aboutCta?: string; projectImagesJson?: string; menuProperties?: string; menuProjects?: string; menuJournal?: string; menuAbout?: string; menuContact?: string; contactInstagram?: string; contactLinkedin?: string; contactWhatsapp?: string; footerBrand?: string; footerAddress?: string; footerLegal?: string; footerCredit?: string
 }
 
 export default async function Page() {
@@ -43,7 +43,7 @@ export default async function Page() {
     else properties = propertyData ?? []
     if (settingsError) console.error('[v0] site_settings load error:', settingsError.message)
 
-    const allowedKeys = new Set<keyof SiteSettings>(['brandName', 'logoUrl', 'heroImageUrl', 'heroTitle', 'heroDescription', 'introTitle', 'introLead', 'introLink', 'propertiesTitle', 'propertiesLink', 'projectsTitle', 'projectsDescription', 'projectsLink', 'journalTitle', 'journalLink', 'aboutTitle', 'aboutLead', 'aboutDescription', 'aboutImageUrl', 'contactTitle', 'contactDescription', 'contactEmail', 'instagramUrl', 'linkedinUrl', 'whatsappUrl', 'footerRole', 'heroImagesJson', 'heroKicker', 'heroCta', 'introKicker', 'propertiesKicker', 'projectsKicker', 'journalKicker', 'aboutKicker', 'contactKicker', 'introCta', 'propertiesCta', 'projectsCta', 'journalCta', 'aboutCta', 'contactCta', 'projectImagesJson', 'menuProperties', 'menuProjects', 'menuJournal', 'menuAbout', 'menuContact', 'contactInstagram', 'contactLinkedin', 'contactWhatsapp', 'footerBrand', 'footerAddress', 'footerLegal', 'footerCredit'])
+    const allowedKeys = new Set<keyof SiteSettings>(['brandName', 'logoUrl', 'heroImageUrl', 'heroTitle', 'heroDescription', 'introTitle', 'introLead', 'introLink', 'propertiesTitle', 'propertiesLink', 'projectsTitle', 'projectsDescription', 'projectsLink', 'journalTitle', 'journalLink', 'aboutTitle', 'aboutLead', 'aboutDescription', 'aboutImageUrl', 'contactTitle', 'contactDescription', 'contactEmail', 'instagramUrl', 'linkedinUrl', 'whatsappUrl', 'footerRole', 'heroImagesJson', 'heroKicker', 'heroCta', 'introKicker', 'propertiesKicker', 'projectsKicker', 'journalKicker', 'aboutKicker', 'contactKicker', 'introCta', 'propertiesCta', 'projectsCta', 'journalCta', 'aboutCta', 'projectImagesJson', 'menuProperties', 'menuProjects', 'menuJournal', 'menuAbout', 'menuContact', 'contactInstagram', 'contactLinkedin', 'contactWhatsapp', 'footerBrand', 'footerAddress', 'footerLegal', 'footerCredit'])
     for (const setting of settingData ?? []) {
       if (allowedKeys.has(setting.key as keyof SiteSettings)) settings[setting.key as keyof SiteSettings] = setting.value
     }
