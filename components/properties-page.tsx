@@ -32,7 +32,7 @@ function displayArea(value: string | number | null | undefined) {
   return /m²|m2/i.test(text) ? text : `${text} m²`
 }
 
-export function PropertiesPage({ properties, images, filterOptions, whatsappUrl, kicker, title }: { properties: Property[]; images: PropertyImage[]; filterOptions?: { operations: string[]; types: string[]; zones: string[] }; whatsappUrl?: string; kicker?: string; title?: string }) {
+export function PropertiesPage({ properties, images, filterOptions, whatsappUrl, kicker, title, logoUrl }: { properties: Property[]; images: PropertyImage[]; filterOptions?: { operations: string[]; types: string[]; zones: string[] }; whatsappUrl?: string; kicker?: string; title?: string; logoUrl?: string }) {
   const [operation, setOperation] = useState('')
   const [type, setType] = useState('')
   const [zone, setZone] = useState('')
@@ -49,7 +49,7 @@ export function PropertiesPage({ properties, images, filterOptions, whatsappUrl,
   return (
     <main className="site-shell properties-page">
       <header className="site-header">
-        <a className="brand" href="/" aria-label="Carolina de Orta, inicio"><span>Carolina de Orta</span></a>
+        <a className="brand" href="/" aria-label="Carolina de Orta, inicio">{logoUrl ? <Image className="brand-logo" src={logoUrl} alt="Carolina de Orta" width={180} height={54} priority /> : <span>Carolina de Orta</span>}</a>
         <nav className="main-nav" aria-label="Navegación principal"><a href="/">Inicio</a><a href="/propiedades">Propiedades</a><a href="/#proyectos">Proyectos</a><a href="/#actualidad">Actualidad</a><a href="/#sobre-mí">Sobre mí</a><a href="/#contacto">Contacto</a></nav>
       </header>
       <section className="properties-page-intro section-pad"><div className="section-kicker">{kicker || '02 / PROPIEDADES'}</div><h1>{title || 'ESPACIOS PARA HABITAR'}</h1><p>Propiedades seleccionadas en Patagonia.</p></section>
