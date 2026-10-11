@@ -22,7 +22,7 @@ type PropertyImage = { property_id: string; image_url: string; is_cover: boolean
 function displayPrice(value: string | number | null | undefined) {
   if (value === null || value === undefined) return '—'
   const text = String(value).trim()
-  return !text || text.toLowerCase().includes('nan') ? '—' : text
+  return !text || text.toLowerCase().includes('nan') || text.toLowerCase().includes('undefined') ? 'Consultar precio' : text
 }
 
 function displayArea(value: string | number | null | undefined) {

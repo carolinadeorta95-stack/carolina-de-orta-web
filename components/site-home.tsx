@@ -59,7 +59,7 @@ function displayHomePrice(value: string | number | null | undefined) {
   if (value === null || value === undefined) return '—'
   if (typeof value === 'number') return Number.isFinite(value) ? `USD ${value.toLocaleString('es-AR')}` : '—'
   const text = String(value).trim()
-  return !text || text.toLowerCase().includes('nan') ? '—' : text
+  return !text || text.toLowerCase().includes('nan') || text.toLowerCase().includes('undefined') ? 'Consultar precio' : text
 }
 
 export function SiteHome({ properties, settings }: { properties: Property[]; settings?: SiteSettings }) {
