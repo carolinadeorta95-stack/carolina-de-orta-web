@@ -81,7 +81,7 @@ const initialSettings: SiteSettings = {
   contactTitle: 'Hagamos lugar a una conversación.', contactDescription: 'Si estás pensando en comprar, vender o invertir en Patagonia, escribime.', contactEmail: 'hola@carolinadeorta.com', instagramUrl: '', linkedinUrl: '', whatsappUrl: '', footerRole: 'LIC. EN ECONOMÍA · MARTILLERA PÚBLICA', projectImageUrl: '', journalCoverUrl: '', journalVideoUrl: '', heroImagesJson: '[]', projectImagesJson: '[]', introKicker: '01 / UNA MIRADA PROPIA', propertiesKicker: '02 / PROPIEDADES', projectsKicker: '03 / PROYECTOS', journalKicker: '04 / ACTUALIDAD', aboutKicker: '05 / SOBRE MÍ', contactKicker: '06 / CONTACTO', heroKicker: 'REAL ESTATE · ECONOMÍA · PATAGONIA', heroCta: 'Explorar propiedades', introCta: 'Conocer más sobre mí', propertiesCta: 'Ver todas', projectsCta: 'Conocer proyectos', journalCta: 'Ver actualidad', aboutCta: 'Hablemos',  menuProperties: 'PROPIEDADES', menuProjects: 'PROYECTOS', menuJournal: 'ACTUALIDAD', menuAbout: 'SOBRE MÍ', menuContact: 'CONTACTO', propertyTypesJson: '["Casa","Departamento","PH","Terreno","Local"]', propertyOperationsJson: '["Venta","Alquiler"]', propertyZonesJson: '[]', contactInstagram: '', contactLinkedin: '', contactWhatsapp: '', footerBrand: 'CAROLINA DE ORTA', footerAddress: '', footerLegal: '', footerCredit: 'Volver arriba ↑',
 }
 
-export type CmsSection = 'portada' | 'introduccion' | 'proyectos' | 'actualidad' | 'sobre-mi' | 'contacto'
+export type CmsSection = 'portada' | 'introduccion' | 'propiedades' | 'proyectos' | 'actualidad' | 'sobre-mi' | 'contacto'
 
 export default function SiteSettingsForm({ initialValues, section }: { initialValues?: Partial<SiteSettings>; section: CmsSection }) {
   const [settings, setSettings] = useState({ ...initialSettings, ...initialValues })
@@ -261,10 +261,11 @@ export default function SiteSettingsForm({ initialValues, section }: { initialVa
       setMessage('Configuración guardada correctamente. Recargá el Preview para ver los cambios.')
   }
 
-  const sectionLabels = { portada: 'Portada', introduccion: 'Introducción', proyectos: 'Proyectos / oportunidades', actualidad: 'Blog / actualidad', 'sobre-mi': 'Sobre mí', contacto: 'Contacto' }
+  const sectionLabels = { portada: 'Portada', introduccion: 'Introducción', propiedades: 'Propiedades', proyectos: 'Proyectos / oportunidades', actualidad: 'Blog / actualidad', 'sobre-mi': 'Sobre mí', contacto: 'Contacto' }
   const sectionFields = {
     portada: ['brandName', 'heroTitle', 'heroDescription', 'heroCta', 'heroKicker'],
     introduccion: ['introKicker', 'introTitle', 'introLead', 'introCta'],
+    propiedades: ['propertiesKicker'],
     proyectos: ['projectsKicker', 'projectsTitle', 'projectsDescription', 'projectsCta'],
     actualidad: ['journalKicker', 'journalTitle', 'journalCta'],
     'sobre-mi': ['aboutKicker', 'aboutTitle', 'aboutLead', 'aboutDescription', 'aboutCta'],

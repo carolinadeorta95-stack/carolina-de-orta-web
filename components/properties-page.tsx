@@ -31,7 +31,7 @@ function displayArea(value: string | number | null | undefined) {
   return /m²|m2/i.test(text) ? text : `${text} m²`
 }
 
-export function PropertiesPage({ properties, images, filterOptions, whatsappUrl }: { properties: Property[]; images: PropertyImage[]; filterOptions?: { operations: string[]; types: string[]; zones: string[] }; whatsappUrl?: string }) {
+export function PropertiesPage({ properties, images, filterOptions, whatsappUrl, kicker }: { properties: Property[]; images: PropertyImage[]; filterOptions?: { operations: string[]; types: string[]; zones: string[] }; whatsappUrl?: string; kicker?: string }) {
   const [operation, setOperation] = useState('')
   const [type, setType] = useState('')
   const [zone, setZone] = useState('')
@@ -51,7 +51,7 @@ export function PropertiesPage({ properties, images, filterOptions, whatsappUrl 
         <a className="brand" href="/" aria-label="Carolina de Orta, inicio"><span>Carolina de Orta</span></a>
         <nav className="main-nav" aria-label="Navegación principal"><a href="/">Inicio</a><a href="/propiedades">Propiedades</a><a href="/#proyectos">Proyectos</a><a href="/#actualidad">Actualidad</a><a href="/#sobre-mí">Sobre mí</a><a href="/#contacto">Contacto</a></nav>
       </header>
-      <section className="properties-page-intro section-pad"><div className="section-kicker">02 / PROPIEDADES</div><h1>Espacios para <em>habitar.</em></h1><p>Propiedades seleccionadas en Patagonia.</p></section>
+      <section className="properties-page-intro section-pad"><div className="section-kicker">{kicker || '02 / PROPIEDADES'}</div><h1>Espacios para <em>habitar.</em></h1><p>Propiedades seleccionadas en Patagonia.</p></section>
       <section className="property-filters section-pad" aria-label="Filtrar propiedades"><label>Operación<select value={operation} onChange={(event) => setOperation(event.target.value)}><option value="">Todas</option>{operations.map((item) => <option key={item}>{item}</option>)}</select></label><label>Tipo<select value={type} onChange={(event) => setType(event.target.value)}><option value="">Todos</option>{types.map((item) => <option key={item}>{item}</option>)}</select></label><label>Zona<select value={zone} onChange={(event) => setZone(event.target.value)}><option value="">Todas</option>{zones.map((item) => <option key={item}>{item}</option>)}</select></label><label>Precio mínimo<input inputMode="decimal" value={minPrice} onChange={(event) => setMinPrice(event.target.value)} /></label><label>Precio máximo<input inputMode="decimal" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} /></label></section>
       <section className="properties-long-list section-pad gray-section" aria-label="Propiedades publicadas">
         {filteredProperties.map((property, index) => {
