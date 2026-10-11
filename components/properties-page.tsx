@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { WhatsAppFloat } from './whatsapp-float'
 
@@ -59,7 +60,7 @@ export function PropertiesPage({ properties, images, filterOptions, whatsappUrl,
           const image = propertyImages[0]?.image_url || property.cover_image
           if (!image) return null
           const type = [property.property_type, property.operation_type].filter(Boolean).join(' · ') || property.status || 'Propiedad'
-          return <article className="property-card property-long-card" key={property.id}><div className="property-image"><Image src={image} alt={property.title} fill sizes="(max-width: 700px) 100vw, 80vw" /><span className="image-number">{String(index + 1).padStart(2, '0')}</span></div><div className="property-meta"><p className="eyebrow">{type}</p><h2>{property.title}</h2><p>{property.location}</p><div className="property-bottom"><span>{displayPrice(property.price)}</span><span>{displayArea(property.area)}</span></div></div></article>
+          return <Link className="property-card property-long-card" href={`/propiedades/${property.id}`} key={property.id}><div className="property-image"><Image src={image} alt={property.title} fill sizes="(max-width: 700px) 100vw, 80vw" /><span className="image-number">{String(index + 1).padStart(2, '0')}</span></div><div className="property-meta"><p className="eyebrow">{type}</p><h2>{property.title}</h2><p>{property.location}</p><div className="property-bottom"><span>{displayPrice(property.price)}</span><span>{displayArea(property.area)}</span></div></div></Link>
         })}
         {!filteredProperties.length && <p className="properties-empty">No hay propiedades que coincidan con los filtros.</p>}
       </section>
