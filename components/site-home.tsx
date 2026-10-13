@@ -19,6 +19,17 @@ type Property = {
   cover_image?: string | null
 }
 
+type NewsItem = {
+  id: string
+  title: string
+  excerpt: string | null
+  category: string | null
+  cover_image: string | null
+  video_url: string | null
+  media_type: string | null
+  published_at: string | null
+}
+
 type DisplayProperty = {
   id?: string
   image: string
@@ -67,7 +78,7 @@ function displayHomePrice(value: string | number | null | undefined) {
   return !text || text.toLowerCase().includes('nan') || text.toLowerCase().includes('undefined') ? 'Consultar precio' : text
 }
 
-export function SiteHome({ properties, settings }: { properties: Property[]; settings?: SiteSettings }) {
+export function SiteHome({ properties, news, settings }: { properties: Property[]; news?: NewsItem[]; settings?: SiteSettings }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const heroGallery = (() => { try { return JSON.parse(settings?.heroImagesJson || '[]') as string[] } catch { return [] } })()
   const heroImages = heroGallery.length ? heroGallery : [settings?.heroImageUrl || 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2200&q=90']
@@ -128,7 +139,7 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
 
       <section id="proyectos" className="projects-section section-pad"><div className="projects-copy"><div className="section-kicker light">{settings?.projectsKicker || '03 / PROYECTOS'}</div><h2>{projectsTitle}</h2><p>{projectsDescription}</p><a className="text-link light-link" href="#contacto">{settings?.projectsCta || 'Conocer proyectos'} <ArrowRight size={16} /></a></div><div className="project-visual"><Image src={projectImage} alt="Arquitectura contemporánea integrada al paisaje" fill sizes="(max-width: 800px) 100vw, 50vw" /><div className="project-tag">01 <span>·</span> DESARROLLO</div></div></section>
 
-      <section id="actualidad" className="journal-section section-pad"><div className="section-heading"><div><div className="section-kicker">{settings?.journalKicker || '04 / ACTUALIDAD'}</div><h2>{journalTitle}</h2></div><a className="text-link" href="#contacto">{settings?.journalCta || 'Ver actualidad'} <ArrowRight size={16} /></a></div><div className="journal-grid">{journal.map((item) => <article className="journal-card" key={item.title}><div className="journal-image"><Image src={item.image} alt="" fill sizes="(max-width: 700px) 100vw, 50vw" /><span className="play-mark"><Play size={14} fill="currentColor" /></span></div><div className="journal-info"><div><p className="eyebrow">{item.category}</p><h3>{item.title}</h3></div><span>{item.date}</span></div></article>)}</div></section>
+      <section id="actualidad" className="journal-section section-pad"><div className="section-heading"><div><div className="section-kicker">{settings?.journalKicker || '04 / ACTUALIDAD'}</div><h2>{journalTitle}</h2></div><a className="text-link" href="#contacto">{settings?.journalCta || 'Ver actualidad'} <ArrowRight size={16} /></a></div><div className="journal-grid">{(news?.length ? news : journal).map((item) => { const isNews = 'id' in item; const title = item.title; const category = item.category || 'Actualidad'; const image = 'cover_image' in item ? item.cover_image : item.image; const date = 'published_at' in item ? (item.published_at ? new Date(item.published_at).toLocaleDateString('es-AR') : '') : item.date; return <article className="journal-card" key={isNews ? item.id : item.title}><div className="journal-image">{image ? <Image src={image} alt={title} fill sizes="(max-width: 700px) 100vw, 50vw" /> : <div className="journal-image-empty" aria-hidden="true" />}{isNews && item.media_type === 'video' && <span className="play-mark"><Play size={14} fill="currentColor" /></span>}</div><div className="journal-info"><div><p className="eyebrow">{category}</p><h3>{title}</h3></div><span>{date}</span></div></article> })}</div></section>
 
       <section id="sobre-mí" className="about-section section-pad gray-section"><div className="about-image"><Image src={settings?.aboutImageUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=85'} alt="Retrato editorial de Carolina de Orta" fill sizes="(max-width: 800px) 100vw, 35vw" /></div><div className="about-copy"><div className="section-kicker">{settings?.aboutKicker || '05 / SOBRE MÍ'}</div><h2>{aboutTitle}</h2><p className="lead">{aboutLead}</p><p>{aboutDescription}</p><a href="#contacto" className="text-link">{settings?.aboutCta || 'Hablemos'} <ArrowRight size={16} /></a></div></section>
 
