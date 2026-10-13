@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { ArrowDown, ArrowRight, Menu, Play, Plus, X } from 'lucide-react'
 import { WhatsAppFloat } from './whatsapp-float'
 import { useEffect, useState } from 'react'
@@ -11,6 +12,8 @@ type Property = {
   location: string
   price: string | number
   area: string | number
+  covered_area_m2?: number | null
+  land_area_m2?: number | null
   description?: string | null
   status?: string | null
   cover_image?: string | null
@@ -24,6 +27,8 @@ type DisplayProperty = {
   location: string
   price: string | number
   area: string | number
+  covered_area_m2?: number | null
+  land_area_m2?: number | null
 }
 
 const fallbackProperties: DisplayProperty[] = [
@@ -96,7 +101,7 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
           title: property.title,
           location: property.location,
           price: property.price,
-          area: property.area,
+          area: property.covered_area_m2 ?? property.land_area_m2 ?? property.area,
         }
       })
     : fallbackProperties
@@ -119,7 +124,7 @@ export function SiteHome({ properties, settings }: { properties: Property[]; set
 
       <section id="intro" className="intro-section section-pad"><div className="section-kicker">{settings?.introKicker || '01 / UNA MIRADA PROPIA'}</div><div className="intro-grid"><h2>{introTitle}</h2><div><p className="lead">{introLead}</p><a href="#sobre-mí" className="text-link">{settings?.introCta || 'Conocer más sobre mí'} <ArrowRight size={16} /></a></div></div></section>
 
-      <section id="propiedades" className="properties-section section-pad gray-section"><div className="section-heading"><div><div className="section-kicker">{settings?.propertiesKicker || '02 / PROPIEDADES'}</div><h2>{propertiesTitle}</h2></div><a className="text-link" href="/propiedades">{settings?.propertiesCta || 'Ver todas'} <ArrowRight size={16} /></a></div><div className="property-grid">{displayProperties.map((property, index) => { const price = displayHomePrice(property.price); const area = typeof property.area === 'number' ? `${property.area} m²` : property.area; return <article className={index === 0 ? 'property-card featured' : 'property-card'} key={property.id || property.title}><div className="property-image"><Image src={property.image} alt={property.title} fill sizes="(max-width: 700px) 100vw, 33vw" /><span className="image-number">0{index + 1}</span></div><div className="property-meta"><p className="eyebrow">{property.type}</p><h3>{property.title}</h3><p>{property.location}</p><div className="property-bottom"><span>{price}</span><span>{area}</span></div></div></article> })}</div></section>
+      <section id="propiedades" className="properties-section section-pad gray-section"><div className="section-heading"><div><div className="section-kicker">{settings?.propertiesKicker || '02 / PROPIEDADES'}</div><h2>{propertiesTitle}</h2></div><a className="text-link" href="/propiedades">{settings?.propertiesCta || 'Ver todas'} <ArrowRight size={16} /></a></div><div className="property-grid">{displayProperties.map((property, index) => { const price = displayHomePrice(property.price); const area = typeof property.area === 'number' ? `${property.area} m²` : property.area; return <Link href={property.id ? `/propiedades/${property.id}` : '/propiedades'} className={index === 0 ? 'property-card featured' : 'property-card'} key={property.id || property.title}><div className="property-image"><Image src={property.image} alt={property.title} fill sizes="(max-width: 700px) 100vw, 33vw" /><span className="image-number">0{index + 1}</span></div><div className="property-meta"><p className="eyebrow">{property.type}</p><h3>{property.title}</h3><p>{property.location}</p><div className="property-bottom"><span>{price}</span><span>{area}</span></div></div></Link> })}</div></section>
 
       <section id="proyectos" className="projects-section section-pad"><div className="projects-copy"><div className="section-kicker light">{settings?.projectsKicker || '03 / PROYECTOS'}</div><h2>{projectsTitle}</h2><p>{projectsDescription}</p><a className="text-link light-link" href="#contacto">{settings?.projectsCta || 'Conocer proyectos'} <ArrowRight size={16} /></a></div><div className="project-visual"><Image src={projectImage} alt="Arquitectura contemporánea integrada al paisaje" fill sizes="(max-width: 800px) 100vw, 50vw" /><div className="project-tag">01 <span>·</span> DESARROLLO</div></div></section>
 

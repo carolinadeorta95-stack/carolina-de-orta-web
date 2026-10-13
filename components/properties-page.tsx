@@ -10,6 +10,11 @@ type Property = {
   property_code?: string | null
   title: string
   location: string
+  neighborhood?: string | null
+  city?: string | null
+  province?: string | null
+  covered_area_m2?: number | null
+  land_area_m2?: number | null
   price: string | number | null
   area: string | number | null
   status?: string | null
@@ -24,6 +29,10 @@ function displayPrice(value: string | number | null | undefined) {
   if (value === null || value === undefined) return '—'
   const text = String(value).trim()
   return !text || text.toLowerCase().includes('nan') || text.toLowerCase().includes('undefined') ? 'Consultar precio' : text
+}
+
+function displayLocation(property: Property) {
+  return Array.from(new Set([property.neighborhood, property.city, property.province, property.location].filter(Boolean).map((value) => String(value).trim()))).join(' · ')
 }
 
 function displayArea(value: string | number | null | undefined) {
@@ -60,7 +69,7 @@ export function PropertiesPage({ properties, images, filterOptions, whatsappUrl,
           const image = propertyImages[0]?.image_url || property.cover_image
           if (!image) return null
           const type = [property.property_type, property.operation_type].filter(Boolean).join(' · ') || property.status || 'Propiedad'
-          return <Link className="property-card property-long-card" href={`/propiedades/${property.id}`} key={property.id}><div className="property-image"><Image src={image} alt={property.title} fill sizes="(max-width: 700px) 100vw, 80vw" /><span className="image-number">{String(index + 1).padStart(2, '0')}</span></div><div className="property-meta"><p className="eyebrow">{type}</p><h2>{property.title}</h2><p>{property.location}</p><div className="property-bottom"><span>{displayPrice(property.price)}</span><span>{displayArea(property.area)}</span></div></div></Link>
+          return <Link className="property-card property-long-card" href={`/propiedades/${property.id}`} key={property.id}><div className="property-image"><Image src={image} alt={property.title} fill sizes="(max-width: 700px) 100vw, 80vw" /><span className="image-number">{String(index + 1).padStart(2, '0')}</span></div><div className="property-meta"><p className="eyebrow">{type}</p><h2>{property.title}</h2><p>{displayLocation(property)}</p><div className="property-bottom"><span>{displayPrice(property.price)}</span><span>{displayArea(property.covered_area_m2 ?? property.land_area_m2 ?? property.area)}</span></div></div></Link>
         })}
         {!filteredProperties.length && <p className="properties-empty">No hay propiedades que coincidan con los filtros.</p>}
       </section>
