@@ -13,12 +13,12 @@ export default async function PropertyDetailRoute({ params }: Params) {
   const [{ data: property, error: propertyError }, { data: images }, { data: settings }] = await Promise.all([
     supabase.from('properties').select('id, property_code, title, location, address, neighborhood, city, province, price, description, status, operation_type, property_type, featured, bedrooms, bathrooms, garages, covered_area_m2, land_area_m2, latitude, longitude, cover_image').eq('id', id).eq('published', true).maybeSingle(),
     supabase.from('property_images').select('id, property_id, image_url, is_cover, sort_order').eq('property_id', id).order('sort_order'),
-    supabase.from('site_settings').select('key, value').in('key', ['contactWhatsapp', 'footerBrand', 'footerRole', 'logoUrl']),
+    supabase.from('site_settings').select('key, value').in('key', ['contactWhatsapp', 'contactPhone', 'contactEmail', 'aboutDescription', 'footerBrand', 'footerRole', 'logoUrl']),
   ])
 
   if (propertyError || !property) notFound()
   const values = Object.fromEntries((settings ?? []).map(({ key, value }) => [key, value]))
-  return <PropertyDetail property={property} images={images ?? []} whatsappUrl={values.contactWhatsapp} footerBrand={values.footerBrand} footerRole={values.footerRole} logoUrl={values.logoUrl} />
+  return <PropertyDetail property={property} images={images ?? []} whatsappUrl={values.contactWhatsapp} footerBrand={values.footerBrand} footerRole={values.footerRole} logoUrl={values.logoUrl} contactEmail={values.contactEmail} contactPhone={values.contactPhone || values.contactWhatsapp} professionalIntro={values.aboutDescription} />
 }
 
 export function generateMetadata() {
