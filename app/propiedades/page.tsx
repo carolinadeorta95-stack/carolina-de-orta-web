@@ -26,6 +26,8 @@ export default async function PropertiesRoute() {
     supabase.from('site_settings').select('key, value').in('key', ['propertyOperationsJson', 'propertyTypesJson', 'propertyZonesJson', 'contactWhatsapp', 'propertiesKicker', 'propertiesTitle', 'logoUrl']),
   ])
   const values = Object.fromEntries((settings ?? []).map(({ key, value }) => [key, value]))
+  const coverByProperty = new Map((images ?? []).filter((image) => image.is_cover).map((image) => [image.property_id, image.image_url]))
+  const syncedProperties = (properties ?? []).map((property) => ({ ...property, cover_image: coverByProperty.get(property.id) || property.cover_image }))
   const parseOptions = (value?: string) => { try { return JSON.parse(value || '[]') as string[] } catch { return [] } }
-  return <PropertiesPage properties={(properties ?? []) as Property[]} images={(images ?? []) as PropertyImage[]} filterOptions={{ operations: parseOptions(values.propertyOperationsJson), types: parseOptions(values.propertyTypesJson), zones: parseOptions(values.propertyZonesJson) }} whatsappUrl={values.contactWhatsapp} kicker={values.propertiesKicker} title={values.propertiesTitle} logoUrl={values.logoUrl} />
+  return <PropertiesPage properties={syncedProperties as Property[]} images={(images ?? []) as PropertyImage[]} filterOptions={{ operations: parseOptions(values.propertyOperationsJson), types: parseOptions(values.propertyTypesJson), zones: parseOptions(values.propertyZonesJson) }} whatsappUrl={values.contactWhatsapp} kicker={values.propertiesKicker} title={values.propertiesTitle} logoUrl={values.logoUrl} />
 }

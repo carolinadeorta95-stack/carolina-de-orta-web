@@ -47,8 +47,9 @@ export default async function Page() {
 
   try {
     const supabase = await createClient()
-    const [{ data: propertyData, error: propertyError }, { data: settingData, error: settingsError }, { data: newsData, error: newsError }] = await Promise.all([
-      supabase.from('properties').select('id, title, location, price, area, description, status, cover_image').eq('published', true).order('created_at', { ascending: false }),
+    const [{ data: propertyData, error: propertyError }, { data: settingData, error: settingsError }, { data: newsData, error: newsError }, { data: propertyImages }] = await Promise.all([
+      supabase.from('properties').select('id, title, location, price, area, description, status, cover_image, covered_area_m2, land_area_m2').eq('published', true).order('created_at', { ascending: false }),
+      supabase.from('property_images').select('property_id, image_url, is_cover, sort_order').order('sort_order'),
       supabase.from('site_settings').select('key, value'),
       supabase.from('news').select('id, title, excerpt, content, category, cover_image, video_url, media_type, published_at').eq('status', 'published').order('published_at', { ascending: false }),
     ])
@@ -67,5 +68,7 @@ export default async function Page() {
     console.error('[v0] Public site data load error:', error)
   }
 
-  return <SiteHome properties={properties} news={news} settings={settings} />
+  const coverByProperty = new Map((propertyImages ?? []).filter((image) => image.is_cover).map((image) => [image.property_id, image.image_url]))
+  const syncedProperties = properties.map((property) => ({ ...property, cover_image: coverByProperty.get(property.id) || property.cover_image }))
+  return <SiteHome properties={syncedProperties} news={news} settings={settings} />
 }
