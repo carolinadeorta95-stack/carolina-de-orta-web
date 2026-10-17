@@ -1,21 +1,27 @@
 import { NextResponse } from 'next/server'
 
+function readString(value: unknown) {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
 export async function POST(request: Request) {
   try {
     const payload = await request.json() as Record<string, unknown>
-    const name = typeof payload.name === 'string' ? payload.name.trim() : ''
-    const email = typeof payload.email === 'string' ? payload.email.trim() : ''
-    const phone = typeof payload.phone === 'string' ? payload.phone.trim() : ''
-    const message = typeof payload.message === 'string' ? payload.message.trim() : ''
-    const propertyId = typeof payload.propertyId === 'string' ? payload.propertyId.trim() : ''
-    const propertyTitle = typeof payload.propertyTitle === 'string' ? payload.propertyTitle.trim() : ''
+    const name = readString(payload.nombre ?? payload.name)
+    const email = readString(payload.email)
+    const phone = readString(payload.telefono ?? payload.phone)
+    const message = readString(payload.mensaje ?? payload.message)
+    const propertyId = readString(payload.propertyId ?? payload.property_id)
+    const propertyTitle = readString(payload.propertyTitle ?? payload.property_title)
 
-    if (name.length < 2 || name.length > 120 || !/^\S+@\S+\.\S+$/.test(email) || email.length > 200 || phone.length > 40 || message.length < 5 || message.length > 2000 || !propertyId || propertyTitle.length < 1 || propertyTitle.length > 200) {
-      return NextResponse.json({ error: 'Revisá los datos ingresados.' }, { status: 400 })
+    if (!email || !/^\S+@\S+\.\S+$/.test(email) || email.length > 200 || !message || message.length > 2000) {
+      return NextResponse.json({ error: 'El email y el mensaje son obligatorios.' }, { status: 400 })
     }
 
     const webhookUrl = process.env.LEADS_WEBHOOK_URL
-    if (!webhookUrl) return NextResponse.json({ error: 'El canal de recepción de consultas no está configurado.' }, { status: 503 })
+    if (!webhookUrl) {
+      return NextResponse.json({ error: 'El webhook de consultas no está configurado.' }, { status: 500 })
+    }
 
     const response = await fetch(webhookUrl, {
       method: 'POST',
@@ -24,9 +30,12 @@ export async function POST(request: Request) {
       cache: 'no-store',
     })
 
-    if (!response.ok) return NextResponse.json({ error: 'No se pudo entregar la consulta.' }, { status: 502 })
-    return NextResponse.json({ ok: true })
+    if (!response.ok) {
+      return NextResponse.json({ error: 'No se pudo reenviar la consulta al webhook.' }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 })
   } catch {
-    return NextResponse.json({ error: 'Revisá los datos ingresados.' }, { status: 400 })
+    return NextResponse.json({ error: 'No se pudo procesar la consulta.' }, { status: 500 })
   }
 }
