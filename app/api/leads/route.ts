@@ -23,14 +23,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'El webhook de consultas no está configurado.' }, { status: 500 })
     }
 
-    const response = await fetch(webhookUrl, {
+    const leadData = { name, email, phone, message, propertyId, propertyTitle, source: 'carolina-de-orta-web', receivedAt: new Date().toISOString() }
+    const webhookResponse = await fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name, email, phone, message, propertyId, propertyTitle, source: 'carolina-de-orta-web', receivedAt: new Date().toISOString() }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(leadData),
+      redirect: 'follow',
       cache: 'no-store',
     })
 
-    if (!response.ok) {
+    const webhookAccepted = webhookResponse.ok || webhookResponse.status === 200 || webhookResponse.status === 302
+    if (!webhookAccepted) {
       return NextResponse.json({ error: 'No se pudo reenviar la consulta al webhook.' }, { status: 500 })
     }
 
