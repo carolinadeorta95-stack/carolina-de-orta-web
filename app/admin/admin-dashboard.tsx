@@ -48,7 +48,7 @@ function displayPrice(value: string | number | null | undefined) {
 const fields = [
   ['title', 'Título', 'text'], ['property_code', 'Código de propiedad', 'text'], ['operation_type', 'Operación', 'text'], ['property_type', 'Tipo de propiedad', 'text'],
   ['address', 'Dirección', 'text'], ['neighborhood', 'Barrio / localidad', 'text'], ['city', 'Ciudad', 'text'], ['province', 'Provincia', 'text'], ['price', 'Precio', 'text'],
-  ['bedrooms', 'Dormitorios', 'number'], ['bathrooms', 'Baños', 'number'], ['garages', 'Cocheras', 'number'], ['covered_area_m2', 'Superficie cubierta (m²)', 'number'], ['land_area_m2', 'Superficie terreno (m²)', 'number'],
+  ['bedrooms', 'Habitaciones / Dormitorios', 'number'], ['bathrooms', 'Baños', 'number'], ['garages', 'Cocheras', 'number'], ['covered_area_m2', 'Superficie cubierta (m²)', 'number'], ['land_area_m2', 'Superficie del lote / terreno (m²)', 'number'],
 ] as const
 
 export default function AdminDashboard({ email, initialProperties, initialImages, initialSettings }: { email: string; initialProperties: Property[]; initialImages: ImageRow[]; initialSettings: Partial<SiteSettings> }) {
